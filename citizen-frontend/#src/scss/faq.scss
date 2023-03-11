@@ -1,0 +1,127 @@
+header {
+  position: relative;
+  .FAQ__tabs {
+    display: flex;
+    .FAQ__tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 35px;
+      cursor: pointer;
+      text-align: center;
+      flex: 1 1 1%;
+    }
+    margin-bottom: 20px;
+  }
+  .FAQ__header {
+    left: 0px;
+    right: 0px;
+    padding: 0 0 30px 0;
+    margin-bottom: -90px;
+    text-align: center;
+    position: fixed;
+    z-index: 2;
+  }
+}
+
+.FAQ__page,
+.Manual__page,
+.TAndC__page {
+  background-color: rgb(224, 242, 216);
+  .page {
+    padding: 150px 0 0 0;
+    @media (max-width: $md3+px) {
+      padding: 60px 0px 0px 0px;
+    }
+  }
+}
+
+#TAndC {
+  & > div:first-child > *:first-child {
+    margin-top: 0;
+  }
+  & > div > * {
+    margin-top: 10px;
+  }
+}
+
+#FAQ,
+#Manual,
+#TAndC {
+  @media (max-width: $md3+px) {
+    margin-top: 50px !important;
+  }
+
+  .FAQ__question,
+  .Manual__question {
+    padding-bottom: 10px;
+    .question_content {
+      display: flex;
+      .arrow {
+        margin-right: 10px;
+        cursor: pointer;
+        & div {
+          transition: transform 0.2s ease;
+          transform: rotate(0deg);
+        }
+
+        &.arrow_down div {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    .FAQ__answer,
+    .Manual__answer {
+      padding-top: 5px;
+      display: block;
+      padding-left: 20px;
+      margin-left: 0px;
+    }
+  }
+}
+
+.FAQ__color {
+  background-color: #e0f2d8;
+}
+
+.Manual__color {
+  background-color: #f5e6d4;
+}
+
+.TAndC__color {
+  background-color: #ebe1ee;
+}
+
+.FAQ__colorGR .FAQ__header {
+  background: linear-gradient(
+    180deg,
+    rgb(224, 242, 216) 0%,
+    rgb(224, 242, 216) 48%,
+    rgba(224, 242, 216, 1) 70%,
+    rgba(224, 242, 216, 0.7768881234134278) 85%,
+    rgba(224, 242, 216, 0.23347075646664917) 90%
+  );
+}
+
+.Manual__colorGR .FAQ__header {
+  background: linear-gradient(
+    180deg,
+    rgb(245, 230, 212) 0%,
+    rgb(245, 230, 212) 48%,
+    rgba(245, 230, 212, 1) 70%,
+    rgba(245, 230, 212, 0.7768881234134278) 85%,
+    rgba(245, 230, 212, 0.23347075646664917) 90%
+  );
+}
+
+.TAndC__colorGR .FAQ__header {
+  background: linear-gradient(
+    180deg,
+    rgb(235, 225, 238) 0%,
+    rgb(235, 225, 238) 48%,
+    rgba(235, 225, 238, 1) 70%,
+    rgba(235, 225, 238, 0.7768881234134278) 85%,
+    rgba(235, 225, 238, 0.23347075646664917) 90%
+  );
+}
