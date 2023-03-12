@@ -1,0 +1,25 @@
+#__page__walletInfo {
+  .button_wallet_copy {
+    margin-bottom: 15px;
+    margin-top: 10px;
+
+    background: #bae8ff;
+    border: 1px solid #908d84;
+    border-radius: 9px;
+    text-align: center;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px 0;
+    div {
+      color: #5a5854;
+    }
+  }
+
+  .walletInfo__footer {
+    margin-bottom: 15px;
+    margin-top: 20px;
+  }
+}

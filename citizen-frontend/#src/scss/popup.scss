@@ -1,0 +1,275 @@
+//====================================================================================================
+._popup-link {
+  cursor: pointer;
+}
+
+.popup {
+  color: $textColor1;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+  padding: 30px 10px;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  transition: visibility 0.8s ease 0s;
+  &::before {
+    content: "";
+    background-color: #eeeae121;
+    backdrop-filter: blur(3px);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.7s ease 0s;
+  }
+  &.show {
+    visibility: visible;
+    overflow: auto;
+    &::before {
+      opacity: 1;
+    }
+    .popup__body {
+      transform: scale(1);
+    }
+  }
+  &._active {
+    visibility: visible;
+    overflow: auto;
+    &::before {
+      opacity: 1;
+    }
+    .popup__body {
+      transition: all 0.3s ease 0.2s;
+      transform: scale(1);
+    }
+  }
+  // .popup__content
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100%;
+    flex: 1 1 auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  // .popup__body
+  &__body {
+    background: #eeeae1;
+    border: 1px solid #908d84;
+    border-radius: 9px;
+
+    transform: scale(0);
+    transition: all 0.3s ease 0s;
+    padding: 30px 50px;
+    width: fit-content;
+    max-width: 800px;
+  }
+
+  &__head {
+    text-align: center;
+  }
+}
+//====================================================================================================
+//====================================================================================================
+
+.popup_moreInfoForStat {
+  .popup__data {
+    width: fit-content;
+    margin: 0 auto;
+    text-align: center;
+    & > * {
+      margin-bottom: 10px;
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
+
+.popup_SocialTies_info {
+  .popup__body {
+    @media (max-width: $md3+px) {
+      min-width: auto;
+      padding: 20px 20px;
+    }
+  }
+  .popup__data > * {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0px;
+    }
+  }
+}
+
+.popup_Describe {
+  .popup__body {
+    width: 90%;
+    max-width: 600px;
+    // min-width: 450px; // более красиво смотрится
+    padding: 20px 30px;
+    @media (max-width: $md4+px) {
+      // min-width: auto;
+      min-width: 90%;
+      padding: 20px 20px;
+    }
+  }
+  .Describe__photo {
+    max-width: 45%;
+    margin: 5px auto 20px auto;
+  }
+  .Describe__block_add {
+    border: 1px solid #908d84;
+    border-radius: 9px;
+    padding: 5px 10px;
+    min-height: 40px;
+    picture {
+      display: flex;
+      img {
+        @include adaptiv-value("height", 30, 15, 1);
+      }
+    }
+  }
+
+  .list__inline {
+    display: flex;
+    & > p {
+      max-width: 50%;
+    }
+
+    & > .field__line {
+      flex: 1 1 1%;
+      border-bottom: 1px solid #908d84;
+      margin: 0 5px 5px 5px;
+    }
+    .field__stat {
+      align-items: flex-end;
+      & > * {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .Describe__ {
+    &Attitude_add,
+    &Character_add,
+    &Vices_add,
+    &Morality_add,
+    &Emotions_add,
+    &Skills_add {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.popup_ChangeTheTies {
+  .popup__body {
+    @media (min-width: $md3+px) {
+      min-width: 450px; // более красиво смотрится
+    }
+    @media (max-width: $md3+px) {
+      padding: 20px 20px;
+    }
+  }
+  .ChangeTheTies__photo {
+    max-width: 45%;
+    margin: 5px auto 20px auto;
+  }
+  .ChangeTheTies__add {
+    input {
+      margin-top: 15px;
+      width: 100%;
+      background: #ffffff00;
+      border-bottom: 1px solid #908d84;
+    }
+  }
+  .form__footer {
+    margin-top: 20px;
+  }
+}
+
+.popup_ThankNo {
+  .popup__body {
+    // max-width: 450px; // более красиво смотрится
+    @media (max-width: $md3+px) {
+      padding: 20px 20px;
+    }
+  }
+  .popup__data {
+    .data__info {
+      margin-top: 20px;
+      text-align: center;
+      background: #e3dfd4;
+      border: 1px solid #908d84;
+      border-radius: 9px;
+    }
+  }
+}
+
+.popup_Thank {
+  .popup__body {
+    max-width: 500px;
+    @media (max-width: $md3+px) {
+      padding: 20px 10px;
+    }
+  }
+  .Thank__photo {
+    max-width: 45%;
+    margin: 5px auto 20px auto;
+  }
+  .Thank__info {
+    text-align: center;
+    margin: 0px 15px 20px 15px;
+  }
+  .Thank__Ton {
+    display: flex;
+    justify-content: center;
+    .button__Token {
+      width: 50%;
+      margin-right: 25px;
+      input {
+        position: relative;
+        margin: 0 0 0 auto;
+        background: #bae8ff;
+        border: 1px solid #908d84;
+        border-radius: 9px;
+        padding: 5px 25px;
+        max-width: 65%;
+        height: 100%;
+        left: 35%;
+        color: #303757;
+        text-align: center;
+      }
+    }
+    .Ton__img {
+      width: 100%;
+      height: 100%;
+      background-image: url("../img/help/ton_logo_light.svg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      p {
+        visibility: hidden;
+        height: 100%;
+      }
+    }
+  }
+  .form__footer {
+    margin-top: 20px;
+  }
+}
+
+.popup_userImg {
+  padding: 60px 10px;
+  .popup__body {
+    max-height: 80%;
+    padding: 30px 20px;
+    width: 100%;
+  }
+}
