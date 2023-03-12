@@ -1,5 +1,11 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
+from aiogram_datepicker.custom_action import DatepickerCustomAction
+
+from aiogram_datepicker.settings import DatepickerSettings
 from .common import cb_welcome, cb_form, cb_common_btn, cb_wallet, cb_gender
+from datetime import datetime, date
+from aiogram.dispatcher import FSMContext
+from bot.states import FormStates
 
 
 def welcome_keyboard(payed: bool) -> InlineKeyboardMarkup:
@@ -53,3 +59,53 @@ def gender_keyboard() -> InlineKeyboardMarkup:
     ik.add(InlineKeyboardButton(
         "Cancel", callback_data=cb_common_btn.new(do="cancel")))
     return ik
+
+
+def _get_datepicker_settings():
+    class TodayAction(DatepickerCustomAction):
+        action: str = 'today'
+        label: str = 'Today'
+
+        def get_action(self, view: str, year: int, month: int, day: int) -> InlineKeyboardButton:
+            return InlineKeyboardButton(self.label,
+                                        callback_data=self._get_callback(view, self.action, year, month, day))
+
+        async def process(self, query: CallbackQuery, view: str, _date: date) -> bool:
+            if view == 'day':
+                await self.set_view(query, 'day', datetime.now().date())
+                return False
+            elif view == 'month':
+                await self.set_view(query, 'month', date(_date.year, datetime.now().date().month, _date.day))
+                return False
+            elif view == 'year':
+                await self.set_view(query, 'month', date(datetime.now().date().year, _date.month, _date.day))
+                return False
+
+    class CancelAction(DatepickerCustomAction):
+        action: str = 'cancel'
+        label: str = 'Cancel'
+
+        def get_action(self, view: str, year: int, month: int, day: int) -> InlineKeyboardButton:
+            return InlineKeyboardButton(self.label,
+                                        callback_data=cb_common_btn.new(do="cancel"))
+
+        async def process(self, query: CallbackQuery, view: str, _date: date) -> bool:
+            if view == 'day':
+                await query.message.delete()
+                return False
+
+    return DatepickerSettings(
+        initial_view='month',
+        views={
+            'day': {
+                'footer': ['prev-month', 'today', 'next-month', ['cancel']],
+            },
+            'month': {
+                'footer': ['today']
+            },
+            'year': {
+                'header': ['today'],
+            }
+        },
+        custom_actions=[TodayAction, CancelAction]
+    )

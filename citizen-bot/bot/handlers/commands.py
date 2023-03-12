@@ -48,14 +48,6 @@ async def default(message: types.Message, state: FSMContext):
         await state.update_data(last_name=message.text)
         data = await state.get_data()
         await message.answer(f'First name: {data["first_name"] if "first_name" in data else "🚫"}\nLast name: {data["last_name"] if "last_name" in data else "🚫"}\nGender: {data["gender"] if "gender" in data else "🚫"}\nDate of birth: {data["date_of_birth"] if "date_of_birth" in data else "🚫"}\nPhoto: {"🖼" if "photo" in data else "🚫"}', reply_markup=form_keyboard())
-    elif await state.get_state() == FormStates.gender_input.state:
-        await state.update_data(gender=message.text)
-        data = await state.get_data()
-        await message.answer(f'First name: {data["first_name"] if "first_name" in data else "🚫"}\nLast name: {data["last_name"] if "last_name" in data else "🚫"}\nGender: {data["gender"] if "gender" in data else "🚫"}\nDate of birth: {data["date_of_birth"] if "date_of_birth" in data else "🚫"}\nPhoto: {"🖼" if "photo" in data else "🚫"}', reply_markup=form_keyboard())
-    elif await state.get_state() == FormStates.date_of_birth_input.state:
-        await state.update_data(date_of_birth=message.text)
-        data = await state.get_data()
-        await message.answer(f'First name: {data["first_name"] if "first_name" in data else "🚫"}\nLast name: {data["last_name"] if "last_name" in data else "🚫"}\nGender: {data["gender"] if "gender" in data else "🚫"}\nDate of birth: {data["date_of_birth"] if "date_of_birth" in data else "🚫"}\nPhoto: {"🖼" if "photo" in data else "🚫"}', reply_markup=form_keyboard())
     elif await state.get_state() == FormStates.photo_upload.state:
         await state.update_data(photo=message.photo)
         data = await state.get_data()
@@ -69,4 +61,4 @@ def register_commands(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start")
     dp.register_message_handler(cmd_wallet, commands="wallet", state="*")
     dp.register_message_handler(cmd_faq, commands="faq", state="*")
-    dp.register_message_handler(default, commands=None, content_types=types.ContentType, state="*")
+    dp.register_message_handler(default, commands=None, content_types=types.ContentTypes.ANY, state="*")

@@ -3,3 +3,4 @@ generate:
 
 migrate:
 	alembic upgrade head
+

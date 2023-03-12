@@ -1,2 +1,0 @@
-if None:
-    print('fdsf')
