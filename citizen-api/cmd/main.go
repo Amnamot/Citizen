@@ -15,6 +15,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/v1/vices", handlers.GetVices).Methods("GET")
@@ -36,5 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println("http://127.0.0.1:8000")
 
 }

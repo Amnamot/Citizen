@@ -28,7 +28,7 @@ func SendTon(w http.ResponseWriter, r *http.Request) {
 	}
 	client := liteclient.NewConnectionPool()
 
-	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -57,7 +57,7 @@ func GetBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	client := liteclient.NewConnectionPool()
 
-	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
