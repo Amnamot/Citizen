@@ -202,7 +202,7 @@ The REST API to the example app is described below.
         "address": "EQAf2_d83qovZQqTY--LW20NBONhzU-D7ItYdXC8td1k520r",
         "content": {
             "name": "Citizen",
-            "description": "gandon",
+            "description": "Citizen",
             "image": "https://arweave.net/9xf_L3YUKvg6e93EnXeOMQNF9kZt-ylh7hCVjSedG78?ext=png",
             "content_url": "https://arweave.net/tyOiQCVaa63urscZEtuZsE3L4zQfAkfzOowY7CsdDhs?ext=html",
             "attributes": []
@@ -223,7 +223,11 @@ The REST API to the example app is described below.
 
 
 # citizen-front
-## Deployment
+## Build
 You need to do the following:
 1. npm i
 2. gulp
+
+
+# citizen-bot
+https://t.me/citizen_pasport_bot
