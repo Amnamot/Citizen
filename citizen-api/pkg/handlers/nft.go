@@ -27,15 +27,6 @@ type Content struct {
 }
 
 type NFTData struct {
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	Gender      string `json:"gender"`
-	DateOfBirth string `json:"dateofbirth"`
-	Address     string `json:"address"`
-	Photo       string `json:"photo"`
-}
-
-type EditNFTData struct {
 	Address  string  `json:"address"`
 	Metadata Content `json:"content"`
 }
@@ -49,9 +40,24 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content, err := json.Marshal(data.Metadata)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		return
+	}
+	url, err := utils.Upload(content)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		return
+	}
+
+	spliturl := strings.Split(url, "/")
+
 	client := liteclient.NewConnectionPool()
 
-	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -62,7 +68,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	api := ton.NewAPIClient(client)
 	wall := utils.GetWallet(api, os.Getenv("SEED"))
 
-	collectionAddr := address.MustParseAddr("EQAsoo5Wgj1wNKh6_tu4MSJKFpvRqPVtykHXFUxHm0Ptdzym")
+	collectionAddr := address.MustParseAddr(os.Getenv("collection_address"))
 	collection := nft.NewCollectionClient(api, collectionAddr)
 
 	collectionData, err := collection.GetCollectionData(context.Background())
@@ -80,7 +86,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mintData, err := collection.BuildMintEditablePayload(collectionData.NextItemIndex, address.MustParseAddr(data.Address), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
-		URI: "1uIsWJ_vtvBUZ5u2XcrVgqFmFaoPGDQwavdlgJjdGiI",
+		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,7 +107,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditNFTItem(w http.ResponseWriter, r *http.Request) {
-	var data EditNFTData
+	var data NFTData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -125,7 +131,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	client := liteclient.NewConnectionPool()
 
-	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -141,7 +147,6 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	body := cell.BeginCell().
 		MustStoreUInt(0x1a0b9d51, 32).
 		MustStoreUInt(rand.Uint64(), 64).
@@ -171,7 +176,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 func GetNFTData(w http.ResponseWriter, r *http.Request) {
 	client := liteclient.NewConnectionPool()
 
-	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := os.Getenv("config_url")
 	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
