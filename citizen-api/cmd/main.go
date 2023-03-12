@@ -23,14 +23,12 @@ func main() {
 	router.HandleFunc("/api/v1/emotions", handlers.GetEmotions).Methods("GET")
 	router.HandleFunc("/api/v1/moralitys", handlers.GetMoralitys).Methods("GET")
 	router.HandleFunc("/api/v1/attitudes", handlers.GetAttitudes).Methods("GET")
-	router.HandleFunc("/api/v1/skills", handlers.GetAttitudes).Methods("GET")
+	router.HandleFunc("/api/v1/skills", handlers.GetSkills).Methods("GET")
 
 	router.HandleFunc("/api/v1/deployNFT", handlers.DeployNFTItem).Methods("POST")
 	router.HandleFunc("/api/v1/editNFT", handlers.EditNFTItem).Methods("POST")
     router.HandleFunc("/api/v1/getNFT/{address}", handlers.GetNFTData).Methods("GET")
 
-	router.HandleFunc("/api/v1/transferTon", handlers.SendTon).Methods("POST")
-    router.HandleFunc("/api/v1/getBalance/{address}", handlers.GetBalance).Methods("GET")
 
 	err = http.ListenAndServe(":8000", router)
 
