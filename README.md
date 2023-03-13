@@ -14,13 +14,13 @@
 
 The REST API to the example app is described below.
 
-## Get list of Vices
+## Get list of data
 
 ### Request
 
-`GET /api/v1/vices`
+`GET /api/v1/data`
 
-    curl 'http://127.0.0.1:8000/api/v1/vices'
+    curl 'http://127.0.0.1:8000/api/v1/data'
 
 ### Response
     HTTP/1.1 200 OK
@@ -32,112 +32,11 @@ The REST API to the example app is described below.
     Vary: Accept-Encoding
     Content-Encoding: gzip
 
-    []
-
-## Get list of Characters
-
-### Request
-
-`GET /api/v1/characters`
-
-    curl 'http://127.0.0.1:8000/api/v1/characters'
-
-### Response
-    HTTP/1.1 200 OK
-    Server: nginx/1.18.0 (Ubuntu)
-    Date: Sun, 12 Mar 2023 11:08:01 GMT
-    Content-Type: text/plain; charset=utf-8
-    Transfer-Encoding: chunked
-    Connection: keep-alive
-    Vary: Accept-Encoding
-    Content-Encoding: gzip
-
-    []
+    {"vices": [], "characters": [], "moralitys": [], "emotions": [], "skills": []}
 
 
-## Get list of Emotions
 
-### Request
-
-`GET /api/v1/emotions`
-
-    curl 'http://127.0.0.1:8000/api/v1/emotions'
-
-### Response
-    HTTP/1.1 200 OK
-    Server: nginx/1.18.0 (Ubuntu)
-    Date: Sun, 12 Mar 2023 11:08:01 GMT
-    Content-Type: text/plain; charset=utf-8
-    Transfer-Encoding: chunked
-    Connection: keep-alive
-    Vary: Accept-Encoding
-    Content-Encoding: gzip
-
-    []
-
-
-## Get list of Moralitys
-
-### Request
-
-`GET /api/v1/moralitys`
-
-    curl 'http://127.0.0.1:8000/api/v1/moralitys'
-
-### Response
-    HTTP/1.1 200 OK
-    Server: nginx/1.18.0 (Ubuntu)
-    Date: Sun, 12 Mar 2023 11:08:01 GMT
-    Content-Type: text/plain; charset=utf-8
-    Transfer-Encoding: chunked
-    Connection: keep-alive
-    Vary: Accept-Encoding
-    Content-Encoding: gzip
-
-    []
-
-## Get list of Attitudes
-
-### Request
-
-`GET /api/v1/attitudes`
-
-    curl 'http://127.0.0.1:8000/api/v1/attitudes'
-
-### Response
-    HTTP/1.1 200 OK
-    Server: nginx/1.18.0 (Ubuntu)
-    Date: Sun, 12 Mar 2023 11:08:01 GMT
-    Content-Type: text/plain; charset=utf-8
-    Transfer-Encoding: chunked
-    Connection: keep-alive
-    Vary: Accept-Encoding
-    Content-Encoding: gzip
-
-    []
-
-## Get list of Skills
-
-### Request
-
-`GET /api/v1/skills`
-
-    curl 'http://127.0.0.1:8000/api/v1/skills'
-
-### Response
-    HTTP/1.1 200 OK
-    Server: nginx/1.18.0 (Ubuntu)
-    Date: Sun, 12 Mar 2023 11:08:01 GMT
-    Content-Type: text/plain; charset=utf-8
-    Transfer-Encoding: chunked
-    Connection: keep-alive
-    Vary: Accept-Encoding
-    Content-Encoding: gzip
-
-    []
-
-
-## Get list of Emotions
+## Get NFT data
 
 ### Request
 
