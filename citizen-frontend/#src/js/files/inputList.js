@@ -1,3 +1,6 @@
+/**
+ * inputList - логика работы с списком
+ */
 const inputList = {
   values: [],
   getValues: function () {

@@ -290,7 +290,7 @@ const otherUser = {
     this.socialRole = socialRole;
     this.setParams(
       params || [
-        ["Character"],
+        ["Characters"],
         ["Skills"],
         ["Vices"],
         ["Morality"],
