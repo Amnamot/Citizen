@@ -1,5 +1,11 @@
 # citizen-api
 
+## The project uses cli bundlr
+
+### Install
+
+    sudo npm i -g @bundlr-network/client
+
 ## Build
 
     go build cmd/main.go
