@@ -12,9 +12,11 @@ import (
 	"github.com/xssnick/tonutils-go/ton/nft"
 	"github.com/xssnick/tonutils-go/ton/wallet"
 	"github.com/xssnick/tonutils-go/tvm/cell"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -27,6 +29,7 @@ type Content struct {
 }
 
 type NFTData struct {
+	ID       int64   `json:"id"`
 	Address  string  `json:"address"`
 	Metadata Content `json:"content"`
 }
@@ -71,21 +74,14 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	collectionAddr := address.MustParseAddr(os.Getenv("collection_address"))
 	collection := nft.NewCollectionClient(api, collectionAddr)
 
-	collectionData, err := collection.GetCollectionData(context.Background())
+	nftAddress, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(data.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
 
-	nftAddress, err := collection.GetNFTAddressByIndex(context.Background(), collectionData.NextItemIndex)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
-		return
-	}
-
-	mintData, err := collection.BuildMintEditablePayload(collectionData.NextItemIndex, address.MustParseAddr(data.Address), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
+	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(data.Address), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
 		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
@@ -136,6 +132,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		return
 	}
 
 	api := ton.NewAPIClient(client)
@@ -181,13 +178,35 @@ func GetNFTData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		return
 	}
 
 	api := ton.NewAPIClient(client)
-	newData, err := nft.NewItemClient(api, address.MustParseAddr(mux.Vars(r)["address"])).GetNFTData(context.Background())
+
+	collectionAddr := address.MustParseAddr(os.Getenv("collection_address"))
+	collection := nft.NewCollectionClient(api, collectionAddr)
+
+	id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		return
 	}
+
+	nftAddr, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(id))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		return
+	}
+
+	newData, err := nft.NewItemClient(api, nftAddr).GetNFTData(context.Background())
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "invalid telegram id"})
+		return
+	}
+
 	json.NewEncoder(w).Encode(newData.Content)
 }

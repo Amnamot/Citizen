@@ -22,7 +22,7 @@ func main() {
 
 	router.HandleFunc("/api/v1/deployNFT", handlers.DeployNFTItem).Methods("POST")
 	router.HandleFunc("/api/v1/editNFT", handlers.EditNFTItem).Methods("POST")
-    router.HandleFunc("/api/v1/getNFT/{address}", handlers.GetNFTData).Methods("GET")
+    router.HandleFunc("/api/v1/getNFT/{id}", handlers.GetNFTData).Methods("GET")
 
 
 	err = http.ListenAndServe(":8000", router)
