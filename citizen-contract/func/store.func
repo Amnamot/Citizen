@@ -1,0 +1,39 @@
+cell load_data() {
+	cell data = get_data();
+	slice ds = data.begin_parse();
+	if (ds.slice_bits() == 0) {
+		return new_dict();
+	} else {
+		return data;
+	}
+}
+
+
+() recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) {
+	int op = in_msg_body~load_uint(32);
+	int query_id = in_msg_body~load_uint(64);
+
+
+	cell data = get_data();
+	slice ds = data.begin_parse();
+	cell dic = ds.slice_bits() == 0 ? new_dict() : data;
+
+
+	if (op == op::create_passport()) {
+		int key = in_msg_body~load_uint(256);
+		dic~udict_set(256, key, in_msg_body~load_ref());
+		set_data(dic);
+		return ();
+	} elseif (op == op::edit_passport()){
+        int key = in_msg_body~load_uint(256);
+        cell data = dic.udict_get?(256, key);
+
+    }
+
+	throw (12);
+}
+
+(int, slice) get_key(int key) method_id {
+	cell dic = load_data();
+	return dic.udict_get?(256, key);
+}
