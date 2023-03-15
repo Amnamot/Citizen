@@ -29,6 +29,7 @@ type Content struct {
 }
 
 type NFTData struct {
+	Photo    string  `json:"photo"`
 	ID       int64   `json:"id"`
 	Address  string  `json:"address"`
 	Metadata Content `json:"content"`
@@ -43,13 +44,22 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	url, err := utils.UploadImg(data.Photo)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		return
+	}
+
+	data.Metadata.Attributes[4]["value"] = url
+
 	content, err := json.Marshal(data.Metadata)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
-	url, err := utils.Upload(content)
+	url, err = utils.UploadContent(content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
@@ -116,7 +126,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
-	url, err := utils.Upload(content)
+	url, err := utils.UploadContent(content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})

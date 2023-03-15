@@ -126,3 +126,50 @@ The REST API to the example app is described below.
     Content-Encoding: gzip
 
     {"URI": ""}
+
+
+## Send message telegram
+
+### Request
+
+`POST /api/v1/sendMessage`
+
+    curl --location 'http://127.0.0.1:8000/api/v1/sendMessage' \
+    --header 'Content-Type: text/plain' \
+    --data '{
+        "chat_id": "977794713",
+        "text": "3423423"
+    }'
+
+### Response
+    HTTP/1.1 200 OK
+    Server: nginx/1.18.0 (Ubuntu)
+    Date: Sun, 12 Mar 2023 11:08:01 GMT
+    Content-Type: text/plain; charset=utf-8
+    Transfer-Encoding: chunked
+    Connection: keep-alive
+    Vary: Accept-Encoding
+    Content-Encoding: gzip
+
+    ""
+
+## Send message telegram
+
+### Request
+
+`GET /api/v1/isuser/{username}`
+
+    curl 'http://127.0.0.1:8000/api/v1/isuser/{username}'
+    
+
+### Response
+    HTTP/1.1 200 OK
+    Server: nginx/1.18.0 (Ubuntu)
+    Date: Sun, 12 Mar 2023 11:08:01 GMT
+    Content-Type: text/plain; charset=utf-8
+    Transfer-Encoding: chunked
+    Connection: keep-alive
+    Vary: Accept-Encoding
+    Content-Encoding: gzip
+
+    {"telegram_id": ,"ispassport": }
