@@ -8,7 +8,7 @@ const run = {
     await generalParameters.setInInput();
     return true;
   },
-  initTrigger: function () {
+  initTrigger: async function () {
     $(document).on('infoLoad', (e, mainUser) => {
       if (tg.user?.id !== mainUser.tgId) {
         if (!(window.location.pathname === '/' && (window.location.hash === '#page_walletInfo' || window.location.hash === ''))) {
@@ -23,6 +23,15 @@ const run = {
         userId = await tg.searchByUsername($('#__page__addSocialTies .form__userName').val());
         if (userId && Number.isInteger(+userId)) {
           this.UserNft.set('Social ties', `${userId}`);
+          const constUser = {
+            token: tg.data.nftAddress || 'undefined',
+            balance: 0,
+          };
+          const NftAttributes = await this.UserNft.getAttributes();
+          const { user, userParam } = await this.getParamsAndUserParameter(NftAttributes);
+          User.__constr(Object.assign(user,constUser),userParam);
+          User.render();
+          window.history.back();
         }
       }
       e.currentTarget.disabled = false;
@@ -36,12 +45,14 @@ const run = {
       'addMorality':'Moralities',
       'addSkills':'Skills',
     };
-    Object.keys(formsPage).forEach((page) => {
+
+    for(const page of Object.keys(formsPage)) {
       $(document).on('click', `#__page__${page} .form__footer .button#add`, async (e) => {
         if ($(`#__page__${page} .add__form .form__property `).val()) {
           console.log(`add in ${page}`);
           const val = {}
-          val[$(`#__page__${page} .add__form .form__property `).val()] = [0, 0, 0];
+          const countOtherUser = (await this.UserNft.search('Social ties')).value || [];
+          val[$(`#__page__${page} .add__form .form__property `).val()] = [0, 0, countOtherUser.length];
           this.UserNft.set(
             formsPage[page],
             val
@@ -55,10 +66,16 @@ const run = {
           const { user, userParam } = await this.getParamsAndUserParameter(NftAttributes);
           User.__constr(Object.assign(user,constUser),userParam);
           User.render();
+          window.history.back();
         }
         return true;
       });
-    })
+    }
+
+    window.addEventListener('beforeunload', async (event) => {
+      await this.UserNft.save();
+      return '';
+    });
     
     return true;
   },
@@ -73,7 +90,6 @@ const run = {
       'Photo': 'userImg',
       'Date of issue': 'dateReg',
       'Action Points': 'points',
-      // 'Rate': 'thanks',
     };
 
     const userParamsMatching = {
@@ -124,7 +140,7 @@ const run = {
           return true;
         }
       }) || ''
-      UserTgId.slice('another_id='.length);
+      UserTgId = UserTgId.slice('another_id='.length);
     }
     this.UserNft = NFT.__constr(UserTgId);
     const NftAttributes = await this.UserNft.getAttributes();
@@ -137,7 +153,8 @@ const run = {
     const { user, userParam } = await this.getParamsAndUserParameter(NftAttributes);
     User.__constr(Object.assign(user,constUser),userParam);
     User.render();
-    if (tg.user?.id !== User?.tgId) {
+    if (tg.user?.id !== (await this.UserNft.search('Telegram ID')).value) {
+      window.location.hash = '';
       User.setView();
     }
     return true;
@@ -174,10 +191,10 @@ const run = {
   init: function () { 
     const load = [];
     run.initTg();
-    // if (!tg.user?.id) {
-    //   window.location = '#page_warningNoTgId';
-    //   return;
-    // }
+    if (!tg.user?.id) {
+      window.location = '#page_warningNoTgId';
+      return;
+    }
     load.push(this.initTrigger());
     load.push(this.initGeneralParameters());
     load.push(this.initUsers());

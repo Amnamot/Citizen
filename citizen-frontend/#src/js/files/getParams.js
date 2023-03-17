@@ -100,7 +100,7 @@ const NFT = {
       attr[search].value.push(AttrValue);
     } else if (Array.isArray(attr[search].value)) {
       console.log(attr[search].value);
-      attr[search].value[0] = Object.assign(attr[search].value[0] || {}, AttrValue);
+      attr[search].value[0] = Object.assign(AttrValue, attr[search].value[0] || {});
       console.log(attr[search].value);
     }
     
@@ -114,7 +114,7 @@ const NFT = {
       }
     });
     
-    return {value:attr[search].value, key:search};
+    return {value:attr[search]?.value, key:search};
   },
   updatePoints: async function () {
     const timeNow = new Date();
@@ -125,7 +125,7 @@ const NFT = {
     const arrReg = valueReg?.split('.');
     const timeReg = new Date(arrReg[2], arrReg[1] - 1, arrReg[0]);
     const passedTime = timeNow - timeReg;
-    const passedWeeks = Math.round(passedTime / 86400000*10);
+    const passedWeeks = Math.round(passedTime / 86400000/7);
     const otherUserCount = (await this.search('Social ties')).value || [];
     if (passedWeeks) {
       const r = {
@@ -144,7 +144,7 @@ const NFT = {
   save: async function () {
     return await $.post(`${this.domain}/api/v1/editNFT`,
       {
-        "address": this?.address,
+        "address": (await this.getAttributes('NFT address')).value || 'none',
         "content": this.nft
       }
     );
