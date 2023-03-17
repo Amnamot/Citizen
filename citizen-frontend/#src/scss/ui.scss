@@ -4,6 +4,10 @@
   text-decoration: underline;
 }
 
+.site{
+  height: 100%;
+}
+
 .autoCompliteList {
   margin-top: 9px;
   background: #eaf0e3;
@@ -113,7 +117,7 @@
   }
 }
 
-.Character__color {
+.Characters__color {
   background: rgb(232, 244, 218);
   &.popup {
     background: rgba(232, 244, 218, 0.75);

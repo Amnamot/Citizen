@@ -9,4 +9,5 @@
 @@include('files/openPage.js', {})
 @@include('files/inputList.js', {})
 @@include('files/user.js', {})
-
+@@include('files/getParams.js', {})
+@@include('files/run.js', {})

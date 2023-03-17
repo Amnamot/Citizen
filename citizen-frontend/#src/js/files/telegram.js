@@ -1,8 +1,8 @@
 const tg = {
   app: window?.Telegram?.WebApp || {},
   init: function () {
-    this.data = window?.Telegram?.WebApp?.initData || {};
-    this.user = window?.Telegram?.WebApp?.initDataUnsafe?.user || {};
+    this.data = this.app?.initData || {};
+    this.user = this.app?.initDataUnsafe?.user || {};
   },
   data: {},
   user: {},
@@ -18,26 +18,24 @@ const tg = {
       //при клике на основную кнопку отправляем данные в строковом виде
     });
   },
+  searchByUsername: throttle(async function (userName) {
+    let res = {};
+    try {
+      res =  JSON.parse(await $.get(`http://80.87.110.6/api/v1/isuser/${userName}`));
+      if (!res?.telegram_id && res.error) {
+        popup_open('UserAlertNotFound');
+        setTimeout(() => {
+          popup_close(
+            document.querySelector('.popup_UserAlertNotFound'),
+            false
+          );
+        }, 300);
+      }
+    } catch (e) {
+      console.trace(e);
+    }
+    return res?.telegram_id || '';
+  },400),
 };
 
 window.tg = tg;
-
-window.addEventListener("load", async function () {
-  tg.init();
-  if (!tg.user?.id) {
-    window.location = '#page_warningNoTgId';
-  }
-
-});
-
-$(document).on('infoLoad', (e,mainUser) => {
-  if (tg.user?.id !== mainUser.tgId) {
-    $(document.querySelectorAll('#User__seeAdmin')).remove();
-    if (!(window.location.pathname === '/' && (window.location.hash === '#page_walletInfo' || window.location.hash === ''))) 
-    {
-      window.location = window.location.origin;
-    }
-  }
-
-  tg.ready();
-})

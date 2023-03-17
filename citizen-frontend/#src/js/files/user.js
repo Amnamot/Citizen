@@ -144,7 +144,7 @@ const UserParams = {
   },
 };
 
-const user = {
+const User = {
   tgName: "none",
   name: "none",
   surname: "none",
@@ -190,6 +190,12 @@ const user = {
     this.setParams(params || []);
     return this;
   },
+  /**
+   * Права только наа просмотр
+   */
+  setView: function () {
+    $(document.querySelectorAll('#User__seeAdmin')).remove();
+  },
   setParams: function (value = null) {
     this.params = [];
     value.forEach((elm) => {
@@ -202,9 +208,9 @@ const user = {
     this.setSelectorValues("#__User_name", `${this.name}`);
     this.setSelectorValues("#__User_surname", `${this.surname}`);
     this.setSelectorValues("#__User_birth", `${this.birth}`);
-    this.setSelectorValues("#__User_points", `${this.points}`);
+    this.setSelectorValues("#__User_points", `${this.points||'0'}`);
     this.setSelectorValues("#__User_gender", `${this.gender}`);
-    this.setSelectorValues("#__User_thanks", `${this.thanks}`);
+    this.setSelectorValues("#__User_thanks", `${this.thanks||0}`);
     this.setSelectorValues(
       "#__User_token",
       `${this.token.slice(0, 3)}...${this.token.slice(-3)}`
@@ -290,7 +296,7 @@ const otherUser = {
     this.socialRole = socialRole;
     this.setParams(
       params || [
-        ["Character"],
+        ["Characters"],
         ["Skills"],
         ["Vices"],
         ["Morality"],
@@ -374,7 +380,7 @@ const otherUser = {
   popupThankNoRender: function () {
     document
       .querySelector(".popup_ThankNo .data__info")
-      .setAttribute("copy", mainUser.token);
+      .setAttribute("copy", User.token);
   },
   render: function () {
     this.tabListRender();
