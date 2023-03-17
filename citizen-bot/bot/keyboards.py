@@ -1,11 +1,9 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram_datepicker.custom_action import DatepickerCustomAction
 
 from aiogram_datepicker.settings import DatepickerSettings
 from .common import cb_welcome, cb_form, cb_common_btn, cb_wallet, cb_gender
 from datetime import datetime, date
-from aiogram.dispatcher import FSMContext
-from bot.states import FormStates
 
 
 def welcome_keyboard(payed: bool) -> InlineKeyboardMarkup:
@@ -34,8 +32,7 @@ def form_keyboard() -> InlineKeyboardMarkup:
 
 
 def cancel_keyboard() -> InlineKeyboardMarkup:
-    ik = InlineKeyboardMarkup().add(InlineKeyboardButton(
-        "Cancel", callback_data=cb_common_btn.new(do="cancel")))
+    ik = InlineKeyboardMarkup().add(InlineKeyboardButton("Cancel", callback_data=cb_common_btn.new(do="cancel")))
     return ik
 
 
@@ -47,9 +44,6 @@ def wallet_keyboard() -> InlineKeyboardMarkup:
         "Cancel", callback_data=cb_common_btn.new(do="cancel")))
     return ik
 
-
-def faq_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup().add(InlineKeyboardButton("FAQ", web_app=WebAppInfo(url='https://arweave.net/gf19OHdjlt0vCA6JM8DOR800kfLsa7DFDd2dpjXHxts?ext=html')))
 
 
 def gender_keyboard() -> InlineKeyboardMarkup:
