@@ -91,7 +91,9 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(data.Address), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
+	key := []byte(os.Getenv("AESKEY"))
+
+	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(utils.DecryptAES(key, data.Address)), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
 		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
@@ -109,7 +111,15 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(nftAddress.String())
+
+	newData, err := nft.NewItemClient(api, nftAddress).GetNFTData(context.Background())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddress.String(), "content": newData.Content, "owner": newData.OwnerAddress.String()})
 }
 
 func EditNFTItem(w http.ResponseWriter, r *http.Request) {
@@ -163,11 +173,13 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 				EndCell(),
 		).EndCell()
 
+	key := []byte(os.Getenv("AESKEY"))
+
 	err = wall.Send(context.Background(), &wallet.Message{
 		Mode: 1,
 		InternalMessage: &tlb.InternalMessage{
 			Bounce:  true,
-			DstAddr: address.MustParseAddr(data.Address),
+			DstAddr: address.MustParseAddr(utils.DecryptAES(key, data.Address)),
 			Amount:  tlb.MustFromTON("0.03"),
 			Body:    body,
 		},
@@ -187,7 +199,7 @@ func GetNFTData(w http.ResponseWriter, r *http.Request) {
 	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		json.NewEncoder(w).Encode(map[string]string{"error": "Error connections from config url"})
 		return
 	}
 
@@ -206,17 +218,17 @@ func GetNFTData(w http.ResponseWriter, r *http.Request) {
 
 	nftAddr, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(id))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
-		return
-	}
-
-	newData, err := nft.NewItemClient(api, nftAddr).GetNFTData(context.Background())
-	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"error": "invalid telegram id"})
 		return
 	}
 
-	json.NewEncoder(w).Encode(newData.Content)
+	newData, err := nft.NewItemClient(api, nftAddr).GetNFTData(context.Background())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddr.String(), "content": newData.Content, "owner": newData.OwnerAddress.String()})
 }

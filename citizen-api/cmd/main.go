@@ -26,7 +26,9 @@ func main() {
 
 	router.HandleFunc("/api/v1/isuser/{username}", handlers.IsUser).Methods("GET")
 	router.HandleFunc("/api/v1/sendMessage", handlers.SendMessage).Methods("POST")
+	router.HandleFunc("/api/v1/transfer", handlers.TransferTon).Methods("POST")
 
+	router.HandleFunc("/api/v1/getbalance/{id}", handlers.GetBalance).Methods("GET")
 
 	err = http.ListenAndServe(":8000", router)
 
