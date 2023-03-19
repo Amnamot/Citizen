@@ -2,7 +2,6 @@ import os
 from aiogram import types, Dispatcher
 import aiohttp
 from bot.db.models import get_user, create_user
-from bot.handlers.forms import get_passport
 from bot.keyboards import welcome_keyboard, getpassport_keyboard, wallet_keyboard
 from bot.states import WelcomeStates, SearchStates
 from aiogram.dispatcher import FSMContext
@@ -36,7 +35,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
 async def cmd_wallet(message: types.Message, state: FSMContext):
     await state.set_state(WalletStates.waiting_click_btn)
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://127.0.0.1:8000/api/v1/getbalance/{message.chat.id}') as resp:
+        async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{message.chat.id}') as resp:
             if resp.status == 200:
                 response = await resp.read()
                 await message.answer(f"Your balance is {response.decode().strip()[1:-1]} TON", reply_markup=wallet_keyboard())
@@ -53,8 +52,6 @@ async def cmd_my(message: types.Message):
 
     if user.ispassport:
         await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html'))))
-    else:
-        await get_passport()
 
 
 async def cmd_search(message: types.Message, state: FSMContext):
@@ -77,7 +74,7 @@ async def cmd_donate(message: types.Message, state: FSMContext):
 
 
 def register_commands(dp: Dispatcher):
-    dp.register_message_handler(cmd_start, commands="start")
+    dp.register_message_handler(cmd_start, commands="start", state="*")
     dp.register_message_handler(cmd_wallet, commands="wallet", state="*")
     dp.register_message_handler(cmd_faq, commands="faq", state="*")
     dp.register_message_handler(cmd_my, commands="my", state="*")

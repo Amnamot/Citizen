@@ -94,7 +94,7 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
 
             await call.message.answer("your passport is minted")
             async with aiohttp.ClientSession() as session:
-                async with session.post('http://127.0.0.1:8000/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id+20, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
+                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id+20, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
                     response = await resp.read()
 
 

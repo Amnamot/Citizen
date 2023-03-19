@@ -2,7 +2,6 @@ import os
 from aiogram import types, Dispatcher
 import aiohttp
 from bot.db.models import get_user
-from bot.handlers.commands import cmd_wallet
 from bot.keyboards import cancel_keyboard, wallet_keyboard
 from bot.states import WalletStates, WithdrawStates
 from aiogram.dispatcher import FSMContext
@@ -23,7 +22,7 @@ async def deposit(call: types.CallbackQuery):
 
 async def withdraw(call: types.CallbackQuery, state: FSMContext):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://127.0.0.1:8000/api/v1/getbalance/{call.message.chat.id}') as resp:
+        async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{call.message.chat.id}') as resp:
             if resp.status == 200:
                 response = await resp.read()
                 if response.decode().strip()[1:-1] == '0':
@@ -37,7 +36,7 @@ async def amount_input(message: types.Message, state: FSMContext):
     if message.text.find(".") == -1:
         if message.text[0] != '0':
             async with aiohttp.ClientSession() as session:
-                async with session.get(f'http://127.0.0.1:8000/api/v1/getbalance/{message.chat.id}') as resp:
+                async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{message.chat.id}') as resp:
                     if resp.status == 200:
                         response = await resp.read()
                         if float(response.decode().strip()[1:-1]) >= float(message.text):
@@ -54,7 +53,7 @@ async def amount_input(message: types.Message, state: FSMContext):
             await message.answer("Wrong amount value")
         else:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f'http://127.0.0.1:8000/api/v1/getbalance/{message.chat.id}') as resp:
+                async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{message.chat.id}') as resp:
                     if resp.status == 200:
                         response = await resp.read()
                         if float(response.decode().strip()[1:-1]) >= float(message.text):
@@ -82,15 +81,20 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
     key = os.getenv("AESKEY").encode()
     data = await state.get_data()
     async with aiohttp.ClientSession() as session:
-        async with session.post(f'http://127.0.0.1:8000/api/v1/transfer', json={"from": encryptAES(key, call.message.chat.id.encode()), "to": data["to_address"], "amount": data["amount"]}) as resp:
+        async with session.post(f'{os.getenv("api_url")}/api/v1/transfer', json={"from": encryptAES(key, call.message.chat.id.encode()), "to": data["to_address"], "amount": data["amount"]}) as resp:
             if resp.status == 200:
                 await call.message.answer("Funds will be credited within 2 minutes")
     await state.set_state(WalletStates.waiting_click_btn)
     await call.message.answer("Wallet", reply_markup=wallet_keyboard())
 
 
-async def cancel():
-    await cmd_wallet()
+async def cancel(call: types.CallbackQuery, state: FSMContext):
+    await state.set_state(WalletStates.waiting_click_btn)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{call.message.chat.id}') as resp:
+            if resp.status == 200:
+                response = await resp.read()
+                await call.message.answer(f"Your balance is {response.decode().strip()[1:-1]} TON", reply_markup=wallet_keyboard())
 
 
 def register_wallet(dp: Dispatcher):
