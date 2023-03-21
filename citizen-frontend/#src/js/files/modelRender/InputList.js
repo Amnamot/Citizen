@@ -1,7 +1,7 @@
 /**
- * inputList - логика работы с списком
+ * InputList - логика работы с списком
  */
-const inputList = {
+const InputList = {
   values: [],
   getValues: function () {
     return this.values.sort();

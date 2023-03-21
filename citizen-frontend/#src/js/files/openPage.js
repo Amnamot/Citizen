@@ -1,5 +1,5 @@
 
-const openPage = {
+const OpenPage = {
   list: {
     index: '__page__index',
     addSocialTies: '__page__addSocialTies',
@@ -87,5 +87,3 @@ const openPage = {
     });
   }
 };
-
-openPage.bindAction();

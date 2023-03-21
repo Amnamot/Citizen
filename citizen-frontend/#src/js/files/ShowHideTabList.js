@@ -1,5 +1,5 @@
 
-const showHideTabList = {
+const ShowHideTabList = {
   mainSelector: '.tabList',
   clickToHideSelector: '.tabList__info',
   dontClickToHideSelector: 'button__moreInfoForStat',
@@ -29,7 +29,7 @@ const showHideTabList = {
   }
 };
 
-const telegramUserTabList = Object.assign({},showHideTabList, {
+const telegramUserTabList = Object.assign({},ShowHideTabList, {
   mainSelector: '#SocialTies .field__list .user',
   clickToHideSelector: '.user__block',
   dontClickToHideSelector: 'user__value',
@@ -37,22 +37,4 @@ const telegramUserTabList = Object.assign({},showHideTabList, {
   needCloseMoreOne: true,
 });
 
-showHideTabList.bindAction();
-
-
-document.querySelectorAll('.copy__value').forEach((elm) => {
-  elm.addEventListener('click', (e) => {
-    let inp = document.createElement('input')
-    inp.value = e.currentTarget.getAttribute('copy')
-    document.body.appendChild(inp)
-    inp.select()
-    
-    if (document.execCommand('copy')) {
-      console.log("Done!")
-    } else {
-      console.log("Failed...")
-    }
-    
-    document.body.removeChild(inp)
-  });
-}) 
+ShowHideTabList.bindAction();

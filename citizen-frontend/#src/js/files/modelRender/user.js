@@ -27,7 +27,7 @@ const userListParams = {
     this.elType = otherUserType.set({}, values);
   },
   addPageRenderList: function () {
-    this.inputList = inputList.render(
+    this.inputList = InputList.render(
       `#__page__add${this.id} .add__form .form__property`,
       this.id,
       this.elType.allType,
@@ -96,7 +96,7 @@ const UserParams = {
     });
   },
   addPageRenderList: function () {
-    this.inputList = inputList.render(
+    this.inputList = InputList.render(
       `#__page__add${this.id} .add__form .form__property`,
       this.id,
       this.elType.allType,
@@ -281,19 +281,21 @@ const otherUser = {
   tgName: "none",
   userImg: "./img/header/profile.svg",
   uniqueId: 0,
+  userId: 0,
   token: "",
   socialRole: { name: "none", count: 0 },
   params: [],
   tabListsTemplate: "otherUser",
-  __constr: function (tgName, socialRole, params, id, userImg, token) {
+  __constr: function (tgName, socialRole, params, id, userImg, token, userId) {
     const otherUser = Object.assign({}, this);
-    otherUser.__set(tgName, socialRole, params, id, userImg, token);
+    otherUser.__set(tgName, socialRole, params, id, userImg, token, userId);
     window.otherUserList.push(otherUser);
     return otherUser;
   },
-  __set: function (tgName, socialRole, params, id, userImg, token) {
+  __set: function (tgName, socialRole, params, id, userImg, token, userId) {
     this.tgName = tgName;
     this.socialRole = socialRole;
+    this.userId = userId;
     this.setParams(
       params || [
         ["Characters"],
@@ -343,6 +345,10 @@ const otherUser = {
         if (elm.getAttribute("href") == "#Thank" && !this.token) {
           elm.setAttribute("href", "#ThankNo");
         }
+
+        if (elm.classList.contains('Set__link')) {
+          elm.setAttribute("href", `?another_id=${this.userId}`);
+        }
       });
 
       document
@@ -391,8 +397,8 @@ const otherUsers = {
   __constr: function (otherUsers) {
     window.otherUserList = [];
     otherUsers.forEach((user, key) => {
-      const { tgName, socialRole, userImg, UserParams: params, token } = user;
-      otherUser.__constr(tgName, socialRole, params, key, userImg, token);
+      const { tgName, socialRole, userImg, UserParams: params, token, id } = user;
+      otherUser.__constr(tgName, socialRole, params, key, userImg, token, id);
     });
 
     return otherUserList;
