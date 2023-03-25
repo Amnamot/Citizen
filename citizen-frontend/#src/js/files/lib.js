@@ -52,6 +52,10 @@ function debounce(f, ms) {
 
 }
 
+function deepClone(original) {
+  return Object.assign({},original,JSON.parse(JSON.stringify(original)));
+}
+
 document.querySelectorAll('.copy__value').forEach((elm) => {
   elm.addEventListener('click', (e) => {
     let inp = document.createElement('input')

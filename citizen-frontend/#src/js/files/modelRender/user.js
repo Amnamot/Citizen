@@ -13,14 +13,15 @@ const userListParams = {
   elType: {},
   tabListsTemplate: "standard",
   inputList: null,
-  __constr: function (id, values, type) {
+  __constr: function (id, values, type, selectForm = '.form__property') {
     const newUserParams = Object.assign({}, this);
-    newUserParams.__set(id, values, type);
+    newUserParams.__set(id, values, type, selectForm||'.form__property');
     return newUserParams;
   },
-  __set: function (id, values, type) {
+  __set: function (id, values, type, selectForm) {
     this.id = id;
     this.input = type;
+    this.selectForm = selectForm;
     this.setType(values);
   },
   setType: function (values) {
@@ -28,7 +29,7 @@ const userListParams = {
   },
   addPageRenderList: function () {
     this.inputList = InputList.render(
-      `#__page__add${this.id} .add__form .form__property`,
+      `#__page__add${this.id} .add__form ${this.selectForm}`,
       this.id,
       this.elType.allType,
       this.input
@@ -121,9 +122,6 @@ const UserParams = {
         .forEach((elm, selKey) => {
           elm.setHTML(element[1][selKey] ?? 0);
         });
-      document
-        .querySelector(`#${this.id}.tabList #tabList__Count`)
-        .setHTML(Object.values(this.elType.type).length);
 
       Describe.querySelector(
         `.Describe__${this.id}_add .${this.id}__list`
@@ -195,6 +193,7 @@ const User = {
    */
   setView: function () {
     $(document.querySelectorAll('#User__seeAdmin')).remove();
+    $(document.querySelectorAll('.User__seeAdmin')).remove();
   },
   setParams: function (value = null) {
     this.params = [];
@@ -372,12 +371,17 @@ const otherUser = {
     });
     document.querySelector(`.popup_Describe .__UserName`).setHTML(this.tgName);
     this.setImg(".popup_Describe .Describe__photo", this.userImg);
+    document.querySelector(`.popup_Describe`).setAttribute('data-user-id', this.userId);
   },
   popupChangeTheTiesRender: function () {
     document
       .querySelector(".popup_ChangeTheTies .__User_Name")
       .setHTML(this.tgName);
     this.setImg(".popup_ChangeTheTies .ChangeTheTies__photo", this.userImg);
+    document
+      .querySelector(".popup_ChangeTheTies  div.button").setAttribute('data-user', this.userId);
+    
+    InputList.render('.popup_ChangeTheTies .form__Ties', 'ChangeTheTies', CONST.ROLE);
   },
   popupThankRender: function () {
     document.querySelector(".popup_Thank .__User_Name").setHTML(this.tgName);

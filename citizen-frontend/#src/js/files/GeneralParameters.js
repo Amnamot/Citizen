@@ -26,6 +26,11 @@ const GeneralParameters = {
     Skills: {
       id: 'Skills',
       inputType: 'input',
+    },
+    SocialTies: {
+      id: 'SocialTies',
+      inputType: 'select',
+      selectForm: '.form__socialRole'
     }
   },
   domain: CONST.DOMAIN,
@@ -37,7 +42,7 @@ const GeneralParameters = {
   getValues: async function () {
     
     try {
-      values = JSON.parse(await $.get(`${this.domain}/api/v1/data`))||[];
+      values = JSON.parse(await $.get(`${this.domain}/api/v1/data`))||{};
     } catch (error) {
       console.trace(error);
     }
@@ -45,11 +50,14 @@ const GeneralParameters = {
   },
   setInInput: async function () {
     const values = await this.getValues();
-    const generalParameters = []
+    values['socialties'] = CONST.ROLE;
+    const generalParameters = [];
+
     Object.values(this.params).forEach((value) => {
-      userListParams.__constr(value.id, values[(value.key ? value.key.toLowerCase() : value.id.toLowerCase())], value.inputType).render();
+      userListParams.__constr(value.id, values[(value.key ? value.key.toLowerCase() : value.id.toLowerCase())], value.inputType, value.selectForm||null).render();
       generalParameters.push({id: value.id, values: values[(value.key ? value.key.toLowerCase() : value.id.toLowerCase())], inputType: value.inputType})
     });
+
     return generalParameters;
   }
 }

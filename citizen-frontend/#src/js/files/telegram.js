@@ -18,7 +18,7 @@ const Telegram = {
       //при клике на основную кнопку отправляем данные в строковом виде
     });
   },
-  searchByUsername: throttle(async function (userName) {
+  searchByUsername: async function (userName) {
     let res = {};
     try {
       res =  JSON.parse(await $.get(`${CONST.DOMAIN}/api/v1/isuser/${userName}`));
@@ -33,9 +33,16 @@ const Telegram = {
       }
     } catch (e) {
       console.trace(e);
+      popup_open('UserAlertNotFound');
+      setTimeout(() => {
+        popup_close(
+          document.querySelector('.popup_UserAlertNotFound'),
+          false
+        );
+      }, 300);
     }
     return res?.telegram_id || '';
-  },400),
+  },
 };
 
 window.Telegram = Telegram;

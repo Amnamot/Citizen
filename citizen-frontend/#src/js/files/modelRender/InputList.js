@@ -61,6 +61,7 @@ const InputList = {
             },
             open: function (event, ui) {
               $(`.autocomplete__${id}`).width($(event.target).width() - 16);
+              $(`.autocomplete__${id}`).css('max-width',$(event.target).width());
               $(`.autocomplete__${id}`).css(
                 "top",
                 +$(`.autocomplete__${id}`).css("top").slice(0, -2) + 3 + "px"
@@ -81,7 +82,6 @@ const InputList = {
         });
 
         this.input.on("focus", (e) => {
-          console.log(1);
           this.input.autocomplete("search", "");
         });
       },

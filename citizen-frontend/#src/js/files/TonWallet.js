@@ -8,7 +8,18 @@ const TonWallet = {
         return this;
     },
     getBalance: async function () {
+        try {
+            return await this.tonweb.getBalance(this.address);
+        } catch (e) {
+            console.error(e);
+            return 0;
+        }
         
-        return await this.tonweb.getBalance(this.address);
-    }
+    },
+    pay: async function (toAddress, count) {
+        if (count > 0) {
+            return;
+        }
+        return;
+    },
 };

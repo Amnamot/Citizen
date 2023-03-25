@@ -1,6 +1,8 @@
 // Запуск скриптов (логика работы)
 const CITIZEN = {
+  User:{},
   UserNft: {},
+  OtherUserNft:[],
   initTg: function (){
     Telegram.init();
   },
@@ -9,25 +11,52 @@ const CITIZEN = {
     return true;
   },
   initTrigger: async function () {
-    $(document).on('click', '#__page__addSocialTies .form__footer .button#add', debounce(async (e) => {
-      e.currentTarget.disabled = true;
-      if ($('#__page__addSocialTies .form__userName').val()) {
+    $(document).on('click', '#__page__addSocialTies .form__footer .button#add', async (e) => {
+      const inputUser = $('#__page__addSocialTies .form__userName');
+      const inputRole = $('#__page__addSocialTies .form__socialRole');
+      if (inputUser.val() && inputRole.val()) {
         userId = await Telegram.searchByUsername($('#__page__addSocialTies .form__userName').val());
         if (userId && Number.isInteger(+userId)) {
-          this.UserNft.set('Social ties', `${userId}`);
-          const constUser = {
-            token: Telegram.data.nftAddress || 'undefined',
-            balance: 0,
-          };
-          const NftAttributes = await this.UserNft.getAttributes();
-          const { user, userParam } = await this.getParamsAndUserParameter(NftAttributes);
-          User.__constr(Object.assign(user,constUser),userParam);
-          User.render();
+          const val = {};
+          val[userId] = $('#__page__addSocialTies .form__socialRole').val() || '';
+          this.UserNft.set('Social ties', val);
+          await this.initOtherUser();
           window.history.back();
+          inputRole.val('');
+          inputUser.val('');
+          $('#__page__addSocialTies .custom-combobox-input').val('');
         }
       }
-      e.currentTarget.disabled = false;
-    }, 400));
+    });
+
+    $(document).on('click', '.popup_ChangeTheTies._active  div.button', async (e) => {
+      const inputRole = $('.popup_ChangeTheTies._active .ChangeTheTies__add .form__Ties');
+      const button = $('.popup_ChangeTheTies._active  div.button');
+      if (inputRole.val() && button.attr('data-user')) {
+        const val = {};
+        val[button.attr('data-user')] = inputRole.val();
+        await this.UserNft.update('Social ties', val);
+        await this.initOtherUser();
+        setTimeout(() => {
+          popup_close(
+            document.querySelector('.popup_ChangeTheTies'),
+            false
+          );
+        }, 300);
+      }
+    });
+
+    $(document).on('click', '.popup_Describe._active  div.button.button__add', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const AddParams = document.querySelector('.popup_Describe._active')?.getAttribute('data-user-id') || '';
+      popup_close(
+        document.querySelector('.popup_Describe'),
+        false,
+        false
+      );
+      window.otherUserAddParams = AddParams;
+    });
 
     const formsPage = {
       'addSocialTies':'Social ties',
@@ -45,14 +74,30 @@ const CITIZEN = {
           console.log(`add in ${page}`);
           const val = {}
           val[$(`#__page__${page} .add__form .form__property `).val()] = [0, 0];
-          this.UserNft.set(
-            formsPage[page],
-            val
-          );
-
-          const { user, userParam } = await this.getParamsAndUserParameter(this.UserNft);
-          User.__constr(user, userParam);
-          User.render();
+          const otherUser = (await this.UserNft.search('Social ties')).value || {};
+          if (window.otherUserAddParams && otherUser[window.otherUserAddParams]) {
+            const index = this.OtherUserNft.findIndex((elm) => { return elm.userId == window.otherUserAddParams });
+            if (index >=0) {
+              this.OtherUserNft[index].set(
+                formsPage[page],
+                val
+              );
+              this.OtherUserNft[index].save();
+    
+              await this.initOtherUser(false);
+              window.otherUserAddParams = '';
+            }
+          } else {
+            this.UserNft.set(
+              formsPage[page],
+              val
+            );
+  
+            const { user, userParam } = await this.getParamsAndUserParameter(this.UserNft, true);
+            User.__constr(user, userParam);
+            User.render();
+            
+          }
           window.history.back();
         }
         return true;
@@ -66,9 +111,10 @@ const CITIZEN = {
     
     return true;
   },
-  getParamsAndUserParameter: async function (Nft) {
+  getParamsAndUserParameter: async function (Nft, needBalance = false ,needTgName = false) {
     let user = {};
     let userParam = [];
+    let countRecords = 0;
     const userParameterMatching = {
       'name': 'First name',
       'surname': 'Last name',
@@ -89,7 +135,7 @@ const CITIZEN = {
       'skills': 'Skills',
     }
 
-    const countOtherUser = (await this.UserNft.search('Social ties')).value || [];
+    const countOtherUser = (await Nft.search('Social ties')).value || {};
 
     for (const element of Object.keys(Object.assign({},userParameterMatching,userParamsMatching))) {
         if (userParameterMatching[element]) {
@@ -98,27 +144,49 @@ const CITIZEN = {
             case 'userImg':
               user[element] = (await $.get((await Nft.search(elm))?.value))|| ''; 
               break;
-        
+            
             default:
               user[element] = Array.isArray((await Nft.search(elm))?.value)?(await Nft.search(elm))?.value[0]: (await Nft.search(elm))?.value;
               break;
+            
           }          
           
         } else if (userParamsMatching[element] && (await Nft.search(userParamsMatching[(element).toLowerCase()]))?.value) {
+          const params = (await Nft.search(userParamsMatching[(element).toLowerCase()]))?.value;
+          const val = {};
+          Object.keys(params).forEach((elm) => {
+            const positive = params[elm][0]||0;
+            const negative = params[elm][1]||0;
+            let ignor = ((Object.values(countOtherUser).length || 0) - positive - negative) || 0;
+
+            if (ignor < 0 || !(typeof ignor === 'number' && isFinite(ignor))) {
+              ignor = Object.values(countOtherUser).length || 0;
+            }
+            if (!Array.isArray(val[elm])) {
+              val[elm] = [];
+            }
+            val[elm].push(...params[elm]);
+            countRecords = countRecords + (+positive + negative);
+            if (val[elm].length == 2) {
+              val[elm].push(ignor);
+            }
+          })
+
+
           userParam.push([
-            userParamsMatching[(element).toLowerCase()],
-            (await Nft.search(userParamsMatching[(element).toLowerCase()]))?.value,
-            countOtherUser.length||0
+            userParamsMatching[element],
+            val
           ]);
+          
         }
     }
 
     user['token'] = Nft?.owner;
-    user['balance'] = Nft?.owner ? await TonWallet.__constr(Nft?.owner).getBalance() : '';
+    user['balance'] = Nft?.owner && needBalance ? await TonWallet.__constr(Nft?.owner).getBalance() : '';
     const params = new URLSearchParams(window.location.search);
     const tgName = params.get("userName") || Telegram.user.username ;
-    user['tgName'] = tgName;
-    return {user, userParam}
+    user['tgName'] = (tgName && needTgName) ? tgName : user['name'];
+    return { user, userParam, countRecords };
   },
   initUsers: async function () {
     await this.initUser();
@@ -136,37 +204,40 @@ const CITIZEN = {
       }) || ''
       UserTgId = UserTgId.slice('another_id='.length) || '';
     }
-    this.UserNft = NFT.__constr(UserTgId);
+    this.UserNft = await NFT.__constr(UserTgId);
     await this.UserNft.updatePoints();
 
-    const { user, userParam } = await this.getParamsAndUserParameter(this.UserNft);
-    User.__constr(user, userParam);
+    const { user, userParam } = await this.getParamsAndUserParameter(this.UserNft, true, true);
+    this.User = User.__constr(user, userParam);
     User.render();
     if (!this.UserNft.nftAddress) {
       window.location.hash = '';
-      User.setView();
     }
     return true;
   },
-  initOtherUser: async function () {
-    let OtherUsersId = (await this.UserNft.search('Social ties'))?.value || [];
-    let OtherUsersNFT = [];
-    const OtherNFT = [];
+  initOtherUser: async function (needUpdate = true) {
+    if (!document.querySelector('#SocialTies.tabList')) {
+      return true;
+    }
+    let OtherUsersId = (await this.UserNft.search('Social ties'))?.value || {};
     const paramForOtherUsers = [];
+    if (needUpdate) {
+      let OtherUsersNFT = [];
+     
+      Object.keys(OtherUsersId).forEach((tgId) => {
+        const OtherUserNFT = NFT.__constr(tgId);
+        OtherUsersNFT.push(OtherUserNFT);
+      });
 
+      OtherUsersNFT = await Promise.all(OtherUsersNFT);
+      this.OtherUserNft = OtherUsersNFT;
+    }
+ 
 
-    OtherUsersId.forEach((tgId) => {
-      const OtherUserNFT = NFT.__constr(tgId);
-      OtherUsersNFT.push(OtherUserNFT.get());
-      OtherNFT.push(OtherUserNFT);
-    });
-
-    OtherUsersNFT = await Promise.all(OtherUsersNFT);
-    
-    for(const NFT of OtherNFT) {
+    for(const NFT of this.OtherUserNft) {
       console.log(NFT);
-      const { user, userParam:UserParams } = await this.getParamsAndUserParameter(NFT);
-        paramForOtherUsers.push({ ...user, UserParams , id:NFT.userId});
+      const { user, userParam:UserParams, countRecords } = await this.getParamsAndUserParameter(NFT);
+        paramForOtherUsers.push({ ...user, UserParams , id:NFT.userId, socialRole:{name: OtherUsersId[NFT.userId], count:countRecords}});
 
     };
     otherUsers.__constr(paramForOtherUsers);
@@ -177,6 +248,7 @@ const CITIZEN = {
     const load = [];
     OpenPage.bindAction();
     this.initTg();
+    window.location.hash = '';
     if (!Telegram.user?.id) {
       window.location = '#page_warningNoTgId';
       return;
@@ -191,6 +263,10 @@ const CITIZEN = {
     });
   },
   loadComplite: function () {
+    if (!this.UserNft.nftAddress) {
+      User.setView();
+    }
+    
     console.info('загрузка завершена');
     Telegram.ready();
   }

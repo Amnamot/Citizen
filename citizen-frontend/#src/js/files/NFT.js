@@ -6,6 +6,7 @@ const NFT = {
   nftAddress: '',
   owner: '',
   needUpdate: true,
+  change: false,
   characteristics: [
     'Attitude',
     'Vices',
@@ -18,16 +19,17 @@ const NFT = {
     'Action Points',
     'Thanks'
   ],
-  __constr: function (userId = '') {
-    this.userId = userId;
-    if (!this.userId) {
+  __constr: async function (userId = '') {
+    const clone = deepClone(this);
+    clone.userId = userId;
+    if (!clone.userId) {
       let params = new URLSearchParams(window.location.search);
-      this.url = params.get("content");
-      this.nftAddress = params.get("nft_address");
-      this.owner = params.get("owner");
+      clone.url = params.get("content");
+      clone.nftAddress = params.get("nft_address");
+      clone.owner = params.get("owner");
     }
-    this.get();
-    return Object.assign({},this)
+    await clone.get();
+    return clone;
   },
   getInfo: async function () {
     let res = JSON.parse(await $.get(`${this.domain}/api/v1/getNFT/${this.userId}`)) || '';
@@ -70,9 +72,6 @@ const NFT = {
         attr[search].value = AttrValue;
       } else if (Array.isArray(attr[search].value) && AttrName === 'Action Points') {
         attr[search].value = AttrValue;
-      } else if (Array.isArray(attr[search].value) && AttrName === 'Social ties') {
-        console.log(attr[search].value);
-        attr[search].value.push(AttrValue);
       } else if (Array.isArray(attr[search].value)) {
         console.log(attr[search].value);
         attr[search].value[0] = Object.assign(AttrValue, attr[search].value[0] || {});
@@ -82,11 +81,38 @@ const NFT = {
       if (Array.isArray(this.nft[AttrName])) {
         this.nft[AttrName].push(...AttrValue);
       } else if (this.nft[AttrName] && typeof this.nft[AttrName] === 'object') {
-        this.nft[AttrName] = Object.assign(this.nft[AttrName], AttrValue);
+        this.nft[AttrName] = Object.assign({}, AttrValue, this.nft[AttrName]);
       } else {
         this.nft[AttrName] = AttrValue;
       }
     }
+    this.change = true;
+    return this.nft;
+  },
+  update: async function (AttrName, AttrValue) {
+    if (!this.characteristics.includes(AttrName)) {
+      // убрать
+      const attr = await this.getAttributes() || [];
+      const { key: search } = await this.search(AttrName);
+      if (!Array.isArray(attr[search].value)) {
+        attr[search].value = AttrValue;
+      } else if (Array.isArray(attr[search].value) && AttrName === 'Action Points') {
+        attr[search].value = AttrValue;
+      } else if (Array.isArray(attr[search].value)) {
+        console.log(attr[search].value);
+        attr[search].value[0] = Object.assign( attr[search].value[0] || {}, AttrValue);
+        console.log(attr[search].value);
+      }
+    } else {
+      if (Array.isArray(this.nft[AttrName])) {
+        this.nft[AttrName].push(...AttrValue);
+      } else if (this.nft[AttrName] && typeof this.nft[AttrName] === 'object') {
+        this.nft[AttrName] = Object.assign({}, this.nft[AttrName], AttrValue);
+      } else {
+        this.nft[AttrName] = AttrValue;
+      }
+    }
+    this.change = true;
     return this.nft;
   },
   search: async function (AttrName) {
@@ -115,14 +141,14 @@ const NFT = {
     const passedTime = timeNow - timeReg;
     const passedWeeks = Math.round(passedTime / 86400000/7);
     const otherUserCount = (await this.search('Social ties')).value || [];
-    if (passedWeeks) {
+    if (passedWeeks && Math.trunc(otherUserCount.length/12) > 0) {
       const r = {
         'Citizen': 1,
         'Sponsor': 2,
         'Micenatus': 4,
       };
       const rate = (await this.search('Rate')).value || 'Citizen';
-      const actionPoints = (await this.search('Action Points')).value || [];
+      const actionPoints = (await this.search('Action Points')).value || [0,0];
       const points = (passedWeeks-actionPoints[1]) * r[rate] * Math.trunc(otherUserCount.length/12);
       this.set('Action Points',[Math.round(points+actionPoints[0]),passedWeeks])
       return true;
@@ -130,11 +156,14 @@ const NFT = {
     return false
   },
   save: async function () {
-    return await $.post(`${this.domain}/api/v1/editNFT`,
+    if (!this.nftAddress || !this.change) {
+      return;
+    }
+    return await $.post(`${this.domain}/api/v1/editNFT`, JSON.stringify(
       {
         "address": this.nftAddress || 'none',
         "content": this.nft
       }
-    );
+    ));
   }
 }

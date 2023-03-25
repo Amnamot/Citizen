@@ -52,7 +52,7 @@ const OpenPage = {
       }
       document.querySelector(`#${el}`)?.classList?.add('hide');
     });
-    if (Object.keys(this.list)[0] != key) {
+    if (Object.keys(this.list)[0] != key && window.location.hash != `#${this.osnOpenHash}${key}`) {
       window.location.hash = `${this.osnOpenHash}${key}`;
     }
     
@@ -78,11 +78,14 @@ const OpenPage = {
     
 
     //Проверка страницы по хешу
-    document.addEventListener('pageChange', (e) => { this.eventOpen(e) } );
+    document.addEventListener('pageChange', (e) => {
+        this.eventOpen(e)
+    });
     this.checkHash();
 
     // события изменения ссылки
-    addEventListener("popstate", (e)=>{
+    addEventListener("popstate", (e) => {
+      window.otherUserAddParams = '';
       this.checkHash();
     });
   }
