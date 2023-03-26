@@ -395,7 +395,7 @@ function popup_open(item, video = '') {
 		history.pushState('', '', '#' + item);
 	}
 }
-function popup_close(item, bodyUnlock = true) {
+function popup_close(item, bodyUnlock = true, history = true) {
 	if (unlock) {
 		if (!item) {
 			for (let index = 0; index < popups.length; index++) {
@@ -418,7 +418,10 @@ function popup_close(item, bodyUnlock = true) {
 		if (!document.querySelector('.menu__body._active') && bodyUnlock) {
 			body_lock_remove(500);
 		}
-		history.pushState('', '', window.location.href.split('#')[0]);
+		if (history) {
+			history.pushState('', '', window.location.href.split('#')[0]);
+		}
+		
 	}
 }
 let popup_close_icon = document.querySelectorAll('.popup__close,._popup-close');
