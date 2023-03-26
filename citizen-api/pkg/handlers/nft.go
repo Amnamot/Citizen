@@ -35,6 +35,16 @@ type NFTData struct {
 	Metadata Content `json:"content"`
 }
 
+type NFTEdit struct {
+	Address  string  `json:"address"`
+	Metadata map[string]interface{} `json:"content"`
+}
+
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	var data NFTData
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -47,7 +57,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	url, err := utils.UploadImg(data.Photo)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
 		return
 	}
 
@@ -62,7 +72,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	url, err = utils.UploadContent(content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
 		return
 	}
 
@@ -74,7 +84,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Error connections from config url"})
 		return
 	}
 
@@ -87,13 +97,13 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	nftAddress, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(data.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to get nft data by index"})
 		return
 	}
 
 	key := []byte(os.Getenv("AESKEY"))
 
-	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(utils.DecryptAES(key, data.Address)), wall.Address(), tlb.MustFromTON("0.03"), &nft.ContentOffchain{
+	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(utils.DecryptAES(key, data.Address)), wall.Address(), tlb.MustFromTON("0.02"), &nft.ContentOffchain{
 		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
@@ -102,12 +112,12 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mint := wallet.SimpleMessage(collectionAddr, tlb.MustFromTON("0.03"), mintData)
+	mint := wallet.SimpleMessage(collectionAddr, tlb.MustFromTON("0.02"), mintData)
 
 	err = wall.Send(context.Background(), mint, true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to send msg"})
 		return
 	}
 
@@ -123,7 +133,8 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditNFTItem(w http.ResponseWriter, r *http.Request) {
-	var data NFTData
+	enableCors(&w)
+	var data NFTEdit
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -136,14 +147,16 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
+
 	url, err := utils.UploadContent(content)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
 		return
 	}
 
 	spliturl := strings.Split(url, "/")
+
 
 	client := liteclient.NewConnectionPool()
 
@@ -151,7 +164,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Error connections from config url"})
 		return
 	}
 
@@ -160,7 +173,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 	wall := utils.GetWallet(api, os.Getenv("SEED"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to get wallet"})
 		return
 	}
 
@@ -186,7 +199,7 @@ func EditNFTItem(w http.ResponseWriter, r *http.Request) {
 	}, true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to send message"})
 		return
 	}
 	json.NewEncoder(w).Encode(map[string]bool{"success": true})
@@ -226,9 +239,12 @@ func GetNFTData(w http.ResponseWriter, r *http.Request) {
 	newData, err := nft.NewItemClient(api, nftAddr).GetNFTData(context.Background())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
+		json.NewEncoder(w).Encode(map[string]string{"error": "failed to get nft data"})
 		return
 	}
+	
 
-	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddr.String(), "content": newData.Content, "owner": newData.OwnerAddress.String()})
+	key := []byte(os.Getenv("AESKEY"))
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": utils.EncryptAES(key, nftAddr.String()), "content": newData.Content, "owner": newData.OwnerAddress.String()})
 }

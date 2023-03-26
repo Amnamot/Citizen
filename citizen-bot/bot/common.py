@@ -40,52 +40,12 @@ metadata = {
             "value": ""
         },
         {
-            "trait_type": "Telegram username",
-            "value": ""
-        },
-        {
-            "trait_type": "Telegram ID",
-            "value": 0
-        },
-        {
             "trait_type": "Date of issue",
             "value": ""
         },
         {
             "trait_type": "Rate",
             "value": ""
-        },
-        {
-            "trait_type": "Action Points",
-            "value": [0,0]
-        },
-        {
-            "trait_type": "Vices",
-            "value": []
-        },
-        {
-            "trait_type": "Characters",
-            "value": []
-        },
-        {
-            "trait_type": "Emotions",
-            "value": []
-        },
-        {
-            "trait_type": "Moralities",
-            "value": []
-        },
-        {
-            "trait_type": "Attitudes",
-            "value": []
-        },
-        {
-            "trait_type": "Skills",
-            "value": []
-        },
-        {
-            "trait_type": "Social ties",
-            "value": []
         }
     ]
 }

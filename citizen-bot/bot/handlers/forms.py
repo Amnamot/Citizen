@@ -1,3 +1,4 @@
+import json
 import os
 from aiogram import Dispatcher, types
 from bot.common import cb_welcome, cb_form, cb_common_btn, cb_gender, metadata, form_text
@@ -85,28 +86,25 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
             metadata["attributes"][1]["value"] = data["last_name"]
             metadata["attributes"][2]["value"] = data["gender"]
             metadata["attributes"][3]["value"] = data["date_of_birth"]
-            metadata["attributes"][5]["value"] = call.message.chat.username
-            metadata["attributes"][6]["value"] = call.message.chat.id
-            metadata["attributes"][7]["value"] = datetime.now(
+            metadata["attributes"][5]["value"] = datetime.now(
             ).date().strftime('%d.%m.%Y')
-            metadata["attributes"][8]["value"] = "Citizen"
+            metadata["attributes"][6]["value"] = "Citizen"
             key = os.getenv("AESKEY").encode()
 
-            await call.message.answer("your passport is minted")
+            await call.message.answer("wait for your passport to be minted")
             async with aiohttp.ClientSession() as session:
-                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id+20, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
+                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id+50, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
                     response = await resp.read()
 
 
                 if resp.status == 200:
-                    print(response)
-                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html'))))
+                    data = json.loads(response.decode())
+                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={data["nft_address"]}&content={data["content"]}&owner={data["owner"]}'))))
                     async with db_session() as session:
                         user: User = await session.get(User, call.message.chat.id)
                         user.ispassport = True
                         await session.commit()
                 else:
-                    print(response)
                     await state.set_state(FormStates.waiting_click_form)
                     await call.message.answer("Failed to mint passport try again")
                     await call.message.answer(form_text.format(data["first_name"] if "first_name" in data else "🚫", data["last_name"] if "last_name" in data else "🚫", data["gender"] if "gender" in data else "🚫", data["date_of_birth"] if "date_of_birth" in data else "🚫", "🖼" if "photo" in data else "🚫"), reply_markup=form_keyboard(), parse_mode="Markdown")
