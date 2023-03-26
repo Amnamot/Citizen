@@ -1,7 +1,7 @@
 /**
- * inputList - логика работы с списком
+ * InputList - логика работы с списком
  */
-const inputList = {
+const InputList = {
   values: [],
   getValues: function () {
     return this.values.sort();
@@ -61,6 +61,7 @@ const inputList = {
             },
             open: function (event, ui) {
               $(`.autocomplete__${id}`).width($(event.target).width() - 16);
+              $(`.autocomplete__${id}`).css('max-width',$(event.target).width());
               $(`.autocomplete__${id}`).css(
                 "top",
                 +$(`.autocomplete__${id}`).css("top").slice(0, -2) + 3 + "px"
@@ -81,7 +82,6 @@ const inputList = {
         });
 
         this.input.on("focus", (e) => {
-          console.log(1);
           this.input.autocomplete("search", "");
         });
       },

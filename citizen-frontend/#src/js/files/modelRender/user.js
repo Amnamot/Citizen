@@ -13,22 +13,23 @@ const userListParams = {
   elType: {},
   tabListsTemplate: "standard",
   inputList: null,
-  __constr: function (id, values, type) {
+  __constr: function (id, values, type, selectForm = '.form__property') {
     const newUserParams = Object.assign({}, this);
-    newUserParams.__set(id, values, type);
+    newUserParams.__set(id, values, type, selectForm||'.form__property');
     return newUserParams;
   },
-  __set: function (id, values, type) {
+  __set: function (id, values, type, selectForm) {
     this.id = id;
     this.input = type;
+    this.selectForm = selectForm;
     this.setType(values);
   },
   setType: function (values) {
     this.elType = otherUserType.set({}, values);
   },
   addPageRenderList: function () {
-    this.inputList = inputList.render(
-      `#__page__add${this.id} .add__form .form__property`,
+    this.inputList = InputList.render(
+      `#__page__add${this.id} .add__form ${this.selectForm}`,
       this.id,
       this.elType.allType,
       this.input
@@ -96,7 +97,7 @@ const UserParams = {
     });
   },
   addPageRenderList: function () {
-    this.inputList = inputList.render(
+    this.inputList = InputList.render(
       `#__page__add${this.id} .add__form .form__property`,
       this.id,
       this.elType.allType,
@@ -121,9 +122,6 @@ const UserParams = {
         .forEach((elm, selKey) => {
           elm.setHTML(element[1][selKey] ?? 0);
         });
-      document
-        .querySelector(`#${this.id}.tabList #tabList__Count`)
-        .setHTML(Object.values(this.elType.type).length);
 
       Describe.querySelector(
         `.Describe__${this.id}_add .${this.id}__list`
@@ -195,6 +193,7 @@ const User = {
    */
   setView: function () {
     $(document.querySelectorAll('#User__seeAdmin')).remove();
+    $(document.querySelectorAll('.User__seeAdmin')).remove();
   },
   setParams: function (value = null) {
     this.params = [];
@@ -281,19 +280,21 @@ const otherUser = {
   tgName: "none",
   userImg: "./img/header/profile.svg",
   uniqueId: 0,
+  userId: 0,
   token: "",
   socialRole: { name: "none", count: 0 },
   params: [],
   tabListsTemplate: "otherUser",
-  __constr: function (tgName, socialRole, params, id, userImg, token) {
+  __constr: function (tgName, socialRole, params, id, userImg, token, userId) {
     const otherUser = Object.assign({}, this);
-    otherUser.__set(tgName, socialRole, params, id, userImg, token);
+    otherUser.__set(tgName, socialRole, params, id, userImg, token, userId);
     window.otherUserList.push(otherUser);
     return otherUser;
   },
-  __set: function (tgName, socialRole, params, id, userImg, token) {
+  __set: function (tgName, socialRole, params, id, userImg, token, userId) {
     this.tgName = tgName;
     this.socialRole = socialRole;
+    this.userId = userId;
     this.setParams(
       params || [
         ["Characters"],
@@ -343,6 +344,10 @@ const otherUser = {
         if (elm.getAttribute("href") == "#Thank" && !this.token) {
           elm.setAttribute("href", "#ThankNo");
         }
+
+        if (elm.classList.contains('Set__link')) {
+          elm.setAttribute("href", `?another_id=${this.userId}`);
+        }
       });
 
       document
@@ -366,12 +371,17 @@ const otherUser = {
     });
     document.querySelector(`.popup_Describe .__UserName`).setHTML(this.tgName);
     this.setImg(".popup_Describe .Describe__photo", this.userImg);
+    document.querySelector(`.popup_Describe`).setAttribute('data-user-id', this.userId);
   },
   popupChangeTheTiesRender: function () {
     document
       .querySelector(".popup_ChangeTheTies .__User_Name")
       .setHTML(this.tgName);
     this.setImg(".popup_ChangeTheTies .ChangeTheTies__photo", this.userImg);
+    document
+      .querySelector(".popup_ChangeTheTies  div.button").setAttribute('data-user', this.userId);
+    
+    InputList.render('.popup_ChangeTheTies .form__Ties', 'ChangeTheTies', CONST.ROLE);
   },
   popupThankRender: function () {
     document.querySelector(".popup_Thank .__User_Name").setHTML(this.tgName);
@@ -391,8 +401,8 @@ const otherUsers = {
   __constr: function (otherUsers) {
     window.otherUserList = [];
     otherUsers.forEach((user, key) => {
-      const { tgName, socialRole, userImg, UserParams: params, token } = user;
-      otherUser.__constr(tgName, socialRole, params, key, userImg, token);
+      const { tgName, socialRole, userImg, UserParams: params, token, id } = user;
+      otherUser.__constr(tgName, socialRole, params, key, userImg, token, id);
     });
 
     return otherUserList;
