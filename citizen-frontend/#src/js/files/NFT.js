@@ -6,6 +6,7 @@ const NFT = {
   nftAddress: '',
   owner: '',
   needUpdate: true,
+  admin: false,
   change: false,
   characteristics: [
     'Attitude',
@@ -27,6 +28,9 @@ const NFT = {
       clone.url = params.get("content");
       clone.nftAddress = params.get("nft_address");
       clone.owner = params.get("owner");
+      if (clone.url && clone.nftAddress && clone.owner) {
+        clone.admin = true;
+      }
     }
     await clone.get();
     return clone;
@@ -39,6 +43,7 @@ const NFT = {
     }
     this.url = res?.content?.URI;
     this.owner = res?.owner;
+    this.nftAddress = res?.nft_address;
   },
   get: async function () {
     if (!this.needUpdate) {
