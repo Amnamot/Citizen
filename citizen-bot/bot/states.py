@@ -23,4 +23,13 @@ class WelcomeStates(StatesGroup):
 class WalletStates(StatesGroup):
     waiting_click_btn = State()
     withdraw = State()
-    deposit = State()
+
+
+class WithdrawStates(StatesGroup):
+    amount_input = State()
+    wallet_input = State()
+    submit = State()
+
+
+class SearchStates(StatesGroup):
+    input_username = State()

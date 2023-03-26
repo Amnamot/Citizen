@@ -1,7 +1,19 @@
 from Crypto.Cipher import AES
-import binascii
 
-def encrypt_aes(key: str, plaintext: str) -> str:
-    cipher = AES.new(key.encode(), AES.MODE_ECB)
-    ciphertext = cipher.encrypt(plaintext.encode())
-    return binascii.hexlify(ciphertext).decode()
+
+def encryptAES(key, plaintext):
+    blockSize = AES.block_size
+    paddedPlaintext = plaintext + bytes([blockSize - len(plaintext) % blockSize]) * (blockSize - len(plaintext) % blockSize)
+    iv = bytes([0] * blockSize)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    ciphertext = cipher.encrypt(paddedPlaintext)
+    return ciphertext.hex()
+
+def decryptAES(key, ciphertext):
+    blockSize = AES.block_size
+    iv = bytes([0] * blockSize)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    decrypted = cipher.decrypt(ciphertext)
+    padding = decrypted[-1]
+    unpaddedPlaintext = decrypted[:-padding]
+    return unpaddedPlaintext

@@ -13,5 +13,3 @@ nft:
     - func/utils/params.func
     - func/utils/op-codes.func
     - func/nft-item.func
-  tests:
-    - tests/content-edit.func

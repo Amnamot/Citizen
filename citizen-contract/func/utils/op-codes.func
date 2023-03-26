@@ -10,3 +10,6 @@ int op::report_royalty_params() asm "0xa8cb00ad PUSHINT";
 int op::edit_content() asm "0x1a0b9d51 PUSHINT";
 int op::transfer_editorship() asm "0x1c04412a PUSHINT";
 int op::editorship_assigned() asm "0x511a4463 PUSHINT";
+
+int op::create_passport() asm "0x511a4467 PUSHINT";
+int op::paid_rate() asm "0x511a4468 PUSHINT";

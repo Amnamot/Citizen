@@ -8,20 +8,19 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from bot.handlers.commands import register_commands
-from bot.handlers.callbacks import register_callbacks
+from bot.handlers.forms import register_forms
+from bot.handlers.search import register_search
+from bot.handlers.wallet import register_wallet
 from dotenv import load_dotenv
 
 load_dotenv()
 
-key = os.getenv("AESKEY")
-
-
 async def set_bot_commands(bot: Bot):
 
     commands = [
-        BotCommand(command="my", description="My passport"),
-        BotCommand(command="search", description="Find a passport"),
+        BotCommand(command="my", description="My pasport"),
         BotCommand(command="requests", description="Verification requests"),
+        BotCommand(command="search", description="Find a pasport"),
         BotCommand(command="premium", description="Premium"),
         BotCommand(command="faq", description="FAQ"),
         BotCommand(command="donate", description="Donate"),
@@ -50,11 +49,12 @@ async def main():
 
     bot = Bot(os.getenv('BOT'), parse_mode="HTML")
     bot["db"] = async_sessionmaker
-    bot['key'] = key
     dp = Dispatcher(bot, storage=MemoryStorage())
 
     register_commands(dp)
-    register_callbacks(dp)
+    register_forms(dp)
+    register_search(dp)
+    register_wallet(dp)
 
     await set_bot_commands(bot)
 

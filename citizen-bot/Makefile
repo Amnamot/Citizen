@@ -3,3 +3,7 @@ generate:
 
 migrate:
 	alembic upgrade head
+
+run:
+	python -m bot
+

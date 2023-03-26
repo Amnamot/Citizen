@@ -9,17 +9,9 @@ from sqlalchemy.orm import sessionmaker
 
 
 def create_async_engine(url: Union[URL, str]) -> sqlalchemy.ext.asyncio.AsyncEngine:
-    """
-    :param url:
-    :return:
-    """
     return _create_async_engine(url=url, echo=bool(os.getenv('debug')), encoding='utf-8', pool_pre_ping=True)
 
 
 
 def get_session_maker(engine: sqlalchemy.ext.asyncio.AsyncEngine) -> sessionmaker:
-    """
-    :param engine:
-    :return:
-    """
     return sessionmaker(engine, class_=sqlalchemy.ext.asyncio.AsyncSession, expire_on_commit=False)
