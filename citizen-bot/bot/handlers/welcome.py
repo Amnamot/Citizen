@@ -15,7 +15,8 @@ async def my_passport(call: types.CallbackQuery):
             response = await resp.read()
     if resp.status == 200:
         data = json.loads(response.decode())
-        await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
+        key = os.getenv("AESKEY").encode()
+        await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(key, data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
 
         
 
