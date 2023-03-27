@@ -52,15 +52,19 @@ async def cmd_my(message: types.Message):
 
     user = await get_user(message.chat.id, db_session)
 
-    if user.ispassport:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{message.chat.id}') as resp:
-                response = await resp.read()
-        if resp.status == 200:
-            data = json.loads(response.decode())
-            await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
+    if user:
+        if user.ispassport:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{message.chat.id}') as resp:
+                    response = await resp.read()
+            if resp.status == 200:
+                data = json.loads(response.decode())
+                await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
 
+        else:
+            await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
     else:
+        await create_user(message.chat.id, message.chat.username, db_session)
         await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
 
 

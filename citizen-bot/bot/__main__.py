@@ -11,6 +11,7 @@ from bot.handlers.commands import register_commands
 from bot.handlers.forms import register_forms
 from bot.handlers.search import register_search
 from bot.handlers.wallet import register_wallet
+from bot.handlers.welcome import register_welcome
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -55,6 +56,7 @@ async def main():
     register_forms(dp)
     register_search(dp)
     register_wallet(dp)
+    register_welcome(dp)
 
     await set_bot_commands(bot)
 
