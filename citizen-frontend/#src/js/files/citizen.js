@@ -263,7 +263,7 @@ const CITIZEN = {
     });
   },
   loadComplite: function () {
-    if (!this.UserNft.nftAddress) {
+    if (!this.UserNft.admin) {
       User.setView();
     }
     
