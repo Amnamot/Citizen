@@ -93,13 +93,13 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
 
             await call.message.answer("wait for your passport to be minted")
             async with aiohttp.ClientSession() as session:
-                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id+50, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
+                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
                     response = await resp.read()
 
 
                 if resp.status == 200:
                     data = json.loads(response.decode())
-                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={data["nft_address"]}&content={data["content"]}&owner={data["owner"]}'))))
+                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
                     async with db_session() as session:
                         user: User = await session.get(User, call.message.chat.id)
                         user.ispassport = True

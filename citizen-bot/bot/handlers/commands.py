@@ -1,3 +1,4 @@
+import json
 import os
 from aiogram import types, Dispatcher
 import aiohttp
@@ -8,6 +9,7 @@ from aiogram.dispatcher import FSMContext
 from bot.states import WalletStates
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from bot.db.models import User
+from bot.utils.aes import encryptAES
 
 
 async def cmd_start(message: types.Message, state: FSMContext):
@@ -51,7 +53,15 @@ async def cmd_my(message: types.Message):
     user = await get_user(message.chat.id, db_session)
 
     if user.ispassport:
-        await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html'))))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{message.chat.id}') as resp:
+                response = await resp.read()
+        if resp.status == 200:
+            data = json.loads(response.decode())
+            await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
+
+    else:
+        await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
 
 
 async def cmd_search(message: types.Message, state: FSMContext):
