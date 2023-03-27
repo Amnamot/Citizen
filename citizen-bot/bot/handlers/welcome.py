@@ -9,24 +9,24 @@ import aiohttp
 from bot.utils.aes import encryptAES
 
 
-async def my_passport(message: types.Message):
+async def my_passport(call: types.CallbackQuery):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{message.chat.id}') as resp:
+        async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{call.message.chat.id}') as resp:
             response = await resp.read()
     if resp.status == 200:
         data = json.loads(response.decode())
-        await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
+        await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(data["nft_address"])}&content={data["content"]}&owner={data["owner"]}'))))
 
         
 
 
-async def another_passport(message: types.Message, state: FSMContext):
+async def another_passport(call: types.CallbackQuery, state: FSMContext):
     await state.set_state(SearchStates.input_username)
-    await message.answer("Enter username to search")
+    await call.message.answer("Enter username to search")
 
 
-async def pay_premium(message: types.Message, state: FSMContext):
-    await message.answer("Comming Soon")
+async def pay_premium(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer("Comming Soon")
 
 def register_welcome(dp: Dispatcher):
     dp.register_callback_query_handler(my_passport, cb_welcome.filter(btn="my passport"), state=WelcomeStates.waiting_click_btn)
