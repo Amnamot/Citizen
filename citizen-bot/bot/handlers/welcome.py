@@ -30,5 +30,5 @@ async def pay_premium(message: types.Message, state: FSMContext):
 
 def register_welcome(dp: Dispatcher):
     dp.register_callback_query_handler(my_passport, cb_welcome.filter(btn="my passport"), state=WelcomeStates.waiting_click_btn)
-    dp.register_callback_query_handler(another_passport, cb_welcome.filter(data="another passport"), state=WelcomeStates.waiting_click_btn)
-    dp.register_callback_query_handler(pay_premium, cb_welcome.filter(data="pay premium"), state=WelcomeStates.waiting_click_btn)
+    dp.register_callback_query_handler(another_passport, cb_welcome.filter(btn="another passport"), state=WelcomeStates.waiting_click_btn)
+    dp.register_callback_query_handler(pay_premium, cb_welcome.filter(btn="pay premium"), state=WelcomeStates.waiting_click_btn)
