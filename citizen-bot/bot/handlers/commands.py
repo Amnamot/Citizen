@@ -59,8 +59,7 @@ async def cmd_my(message: types.Message):
                     response = await resp.read()
             if resp.status == 200:
                 data = json.loads(response.decode())
-                key = os.getenv("AESKEY").encode()
-                await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={encryptAES(key, data["nft_address"].encode())}&content={data["content"]}&owner={data["owner"]}'))))
+                await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={data["nft_address"]}&content={data["content"]["URI"]}&owner={data["owner"]}'))))
 
         else:
             await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
