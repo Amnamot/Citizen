@@ -338,11 +338,11 @@
     <div class="tabList__more hide">
       <div class="field__list miniText">
 
-        <!-- <template id = 'tabListsTemplate__otherUser'> -->
+		{{ range $key, $data := .Ties}}
           <div class="user user__select">
             <div class="user__block">
-              <div class="user__name cursor__pointer">Aimedin</div>
-              <div class="user__value">Mother (17)</div>
+              <div class="user__name cursor__pointer">{{ $key }}</div>
+              <div class="user__value">{{ .role }} (0)</div>
             </div>
             <div class="user__action miniText hide">
               <ul class="list">
@@ -353,7 +353,7 @@
               </ul>
             </div>
           </div>
-        <!-- </template> -->
+		  {{ end }}
 
         <div id="User__seeAdmin" class="button button__add button__line">
           <div  class="miniText" onclick = "window.location = '/addsocialtie'"> Add entry</div> 

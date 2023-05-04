@@ -354,8 +354,15 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 
 
 		if (username != "" && role != ""){
+			var tg_id int
+			err = dbpool.QueryRow(context.Background(), "SELECT telegram_id FROM users WHERE username=$1", username).Scan(&tg_id)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+				return
+			}
 			if data.Ties[username] == nil {
-				data.Ties[username] = map[string]string{"role": role}
+				data.Ties[username] = map[string]interface{}{"role": role, "id": tg_id}
 			}
 		} 
 
