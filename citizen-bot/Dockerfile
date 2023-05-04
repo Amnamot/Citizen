@@ -10,3 +10,5 @@ COPY . .
 RUN pip install wheel
 
 RUN pip install -r requirements.txt
+
+RUN make migrate
