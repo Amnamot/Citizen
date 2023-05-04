@@ -48,8 +48,8 @@ def wallet_keyboard() -> InlineKeyboardMarkup:
 
 def gender_keyboard() -> InlineKeyboardMarkup:
     ik = InlineKeyboardMarkup()
-    ik.add(InlineKeyboardButton('👨', callback_data=cb_gender.new(btn="man")), 
-           InlineKeyboardButton('👩', callback_data=cb_gender.new(btn="woman")))
+    ik.add(InlineKeyboardButton('man', callback_data=cb_gender.new(btn="man")), 
+           InlineKeyboardButton('woman', callback_data=cb_gender.new(btn="woman")))
     ik.add(InlineKeyboardButton(
         "Cancel", callback_data=cb_common_btn.new(do="cancel")))
     return ik

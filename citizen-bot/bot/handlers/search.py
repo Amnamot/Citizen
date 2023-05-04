@@ -14,7 +14,7 @@ async def search_input(message: types.Message):
     async with db_session() as session:
         user: User = await session.get(User, message.chat.username)
 
-    await message.answer(message.chat.username, reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?another_id={user.telegram_id}'))))
+    await message.answer(message.chat.username, reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
 
 
 def register_search(dp: Dispatcher):

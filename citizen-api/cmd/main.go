@@ -3,34 +3,38 @@ package main
 import (
 	"citizen-api/pkg/handlers"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 )
 
 func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/v1/data", handlers.GetData).Methods("GET")
-
 	router.HandleFunc("/api/v1/deployNFT", handlers.DeployNFTItem).Methods("POST")
-	router.HandleFunc("/api/v1/editNFT", handlers.EditNFTItem).Methods("POST")
-    router.HandleFunc("/api/v1/getNFT/{id}", handlers.GetNFTData).Methods("GET")
 
-	router.HandleFunc("/api/v1/isuser/{username}", handlers.IsUser).Methods("GET")
-	router.HandleFunc("/api/v1/sendMessage", handlers.SendMessage).Methods("POST")
-	router.HandleFunc("/api/v1/transfer", handlers.TransferTon).Methods("POST")
+	router.HandleFunc("/", handlers.Index).Methods("GET")
 
-	router.HandleFunc("/api/v1/getbalance/{id}", handlers.GetBalance).Methods("GET")
+	router.HandleFunc("/addvice", handlers.Vices).Methods("GET", "POST")
 
-	err = http.ListenAndServe(":8000", router)
+	router.HandleFunc("/addsocialtie", handlers.SocialTies).Methods("GET", "POST")
+
+	router.HandleFunc("/addskill", handlers.Skills).Methods("GET", "POST")
+
+	router.HandleFunc("/addmorality", handlers.Morality).Methods("GET", "POST")
+
+	router.HandleFunc("/addemotion", handlers.Emotions).Methods("GET", "POST")
+
+	router.HandleFunc("/addcharacter", handlers.Characters).Methods("GET", "POST")
+
+	router.HandleFunc("/addattitude", handlers.Attitude).Methods("GET", "POST")
+
+	
+
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
+	err := http.ListenAndServe(":8000", router)
 
 	if err != nil {
 		log.Fatal(err)

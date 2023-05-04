@@ -1,0 +1,43 @@
+{
+    "name": "Citizen",
+    "description": "Citizen passport web 3.0",
+    "image": "https://arweave.net/rHbjyHd_mr_BiXwhpoODJgVMtVn4_-OS65ZSeHsh3QU?ext=png",
+    "content_url": "https://tonbyte.com/gateway/CD6222006BCDE74BAF4AFE6597C479B3614AD084193943B43D56ECDD82CA1EBC/index.html",
+    "attributes": [
+        {
+            "trait_type": "First name",
+            "value": "Aimedin"
+        },
+        {
+            "trait_type": "Last name",
+            "value": "Chorobaev"
+        },
+        {
+            "trait_type": "Gender",
+            "value": "\ud83d\udc68"
+        },
+        {
+            "trait_type": "Date of birth",
+            "value": "11.01.2023"
+        },
+        {
+            "trait_type": "Photo",
+            "value": ""
+        },
+        {
+            "trait_type": "Date of issue",
+            "value": "23.04.2023"
+        },
+        {
+            "trait_type": "Rate",
+            "value": "Citizen"
+        }
+    ],
+    "vices": [],
+    "characters": [],
+    "moralities": [],
+    "skills": [],
+    "emotions": [],
+    "attitudes": [],
+    "ties": []
+}

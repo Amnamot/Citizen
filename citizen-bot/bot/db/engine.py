@@ -2,7 +2,6 @@ import os
 from typing import Union
 
 import sqlalchemy.ext.asyncio
-from sqlalchemy import MetaData
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import create_async_engine as _create_async_engine
 from sqlalchemy.orm import sessionmaker

@@ -1,5 +1,5 @@
 from .base import BaseModel
-from sqlalchemy import Column, Integer, VARCHAR, Boolean
+from sqlalchemy import Column, Integer, VARCHAR, Boolean, JSON
 from sqlalchemy.orm import sessionmaker
 from tonsdk.crypto import mnemonic_new
 
@@ -13,6 +13,8 @@ class User(BaseModel):
     seed = Column(VARCHAR(320), unique=True, nullable=False)
     ispassport = Column(Boolean, default=False)
     payed = Column(Boolean, default=False)
+    isedit = Column(Boolean, default=False)
+    content = Column(JSON, default={})
 
 
 async def get_user(telegram_id: int, session_maker: sessionmaker) -> User:

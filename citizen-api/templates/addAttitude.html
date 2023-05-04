@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="ru">   <head>
+	<title>Citizen</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="static/css/style.min.css">
+	<link rel="shortcut icon" href="static/img/favico.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+</head>  <body>    <div class="site">      <div id="params_form" class="wrapper Attitude__color">
+  <header class="add__header title">
+    <div class="add__header_tittle">Add Attitude</div>
+    <div class="button_info text  cursor__pointer" id="info_open">!!!</div>
+  </header>
+  <main class="page add_page">
+    <form class="add__form _container" method="post" action="/addattitude">
+      <div class="form__block standartText">
+        Add property:
+        <select id="combobox" class="form__property standartText" name="attitude_1">
+          <option value=""></option>
+          {{ range .attitudes}}
+          <option value="{{.}}">{{.}}</option>
+          {{ end }}
+        </select>
+      </div>
+      <div class="form__block standartText">
+        Add more:
+        <select id="combobox" class="form__more standartText" name="attitude_2">
+          <option value=""></option>
+          {{ range .attitudes}}
+          <option value="{{.}}">{{.}}</option>
+          {{ end }}
+        </select>
+      </div>
+      <input type="text" name="id" value="{{ .id }}" hidden>
+      <div class="form__footer standartText">
+        <div>
+          <button type="submit" class="button button__white title disabled" id="add">Add</button>
+          <button class="button button__white title" onclick="history.back()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+  <footer class="footer">
+</footer>
+</div>
+      <div id="params_info" class="wrapper Attitude__color" style="display: none">
+  <main class="page add_page">
+    <div class="_container">
+      <div class="text">
+        The mood is the general condition of the individual or group of
+        individuals in relation to people around them, processes and internal
+        states. In other words, the mood is a mood, as a combination of
+        emotional factors, the nature and values ​​of a person.
+      </div>
+
+      <div class="form__footer standartText">
+        <div>
+          <div id="form_open" class="button button__white title" onclick="history.back()">
+            OK
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+    </div>    <script src="static/js/vendors.min.js"></script>
+<script src="static/js/app.min.js"></script>    <script src="static/js/add.min.js"></script>  </body></html>

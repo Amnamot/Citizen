@@ -1,5 +1,1 @@
-# citizen-frontend
-/citizen-frontend/node_modules
-/citizen-frontend/.vscode
-/citizen-frontend/citizen-frontend
-/citizen-frontend/package-lock.json
+.env

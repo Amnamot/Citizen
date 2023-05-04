@@ -4,19 +4,15 @@ import (
 	"citizen-api/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/tlb"
 	"github.com/xssnick/tonutils-go/ton"
 	"github.com/xssnick/tonutils-go/ton/nft"
 	"github.com/xssnick/tonutils-go/ton/wallet"
-	"github.com/xssnick/tonutils-go/tvm/cell"
 	"math/big"
-	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -26,6 +22,13 @@ type Content struct {
 	Image       string                   `json:"image"`
 	ContentUrl  string                   `json:"content_url"`
 	Attributes  []map[string]interface{} `json:"attributes"`
+	Vices map[string]interface{} `json:"vices"`
+	Characters map[string]interface{} `json:"characters"`
+	Moralities map[string]interface{} `json:"moralities"`
+	Skills map[string]interface{} `json:"skills"`
+	Emotions map[string]interface{} `json:"emotions"`
+	Attitudes map[string]interface{} `json:"attitudes"`
+	Ties map[string]interface{} `json:"ties"`
 }
 
 type NFTData struct {
@@ -33,17 +36,10 @@ type NFTData struct {
 	ID       int64   `json:"id"`
 	Address  string  `json:"address"`
 	Metadata Content `json:"content"`
-}
-
-type NFTEdit struct {
-	Address  string  `json:"address"`
-	Metadata map[string]interface{} `json:"content"`
+	Key string `json:"key"`
 }
 
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
 
 func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	var data NFTData
@@ -51,6 +47,14 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
+		return
+	}
+
+	key := []byte(os.Getenv("KEY"))
+
+	if (string(key) != data.Key){
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "bad request"})
 		return
 	}
 
@@ -101,9 +105,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	key := []byte(os.Getenv("AESKEY"))
-
-	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(utils.DecryptAES(key, data.Address)), wall.Address(), tlb.MustFromTON("0.02"), &nft.ContentOffchain{
+	mintData, err := collection.BuildMintEditablePayload(big.NewInt(data.ID), address.MustParseAddr(data.Address), wall.Address(), tlb.MustFromTON("0.02"), &nft.ContentOffchain{
 		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
@@ -130,121 +132,4 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddress.String(), "content": newData.Content, "owner": newData.OwnerAddress.String()})
-}
-
-func EditNFTItem(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	var data NFTEdit
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
-		return
-	}
-	content, err := json.Marshal(data.Metadata)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
-		return
-	}
-
-	url, err := utils.UploadContent(content)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
-		return
-	}
-
-	spliturl := strings.Split(url, "/")
-
-
-	client := liteclient.NewConnectionPool()
-
-	configUrl := os.Getenv("config_url")
-	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Error connections from config url"})
-		return
-	}
-
-	api := ton.NewAPIClient(client)
-
-	wall := utils.GetWallet(api, os.Getenv("SEED"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to get wallet"})
-		return
-	}
-
-	body := cell.BeginCell().
-		MustStoreUInt(0x1a0b9d51, 32).
-		MustStoreUInt(rand.Uint64(), 64).
-		MustStoreRef(
-			cell.BeginCell().
-				MustStoreStringSnake(spliturl[len(spliturl)-1]).
-				EndCell(),
-		).EndCell()
-
-	key := []byte(os.Getenv("AESKEY"))
-
-	err = wall.Send(context.Background(), &wallet.Message{
-		Mode: 1,
-		InternalMessage: &tlb.InternalMessage{
-			Bounce:  true,
-			DstAddr: address.MustParseAddr(utils.DecryptAES(key, data.Address)),
-			Amount:  tlb.MustFromTON("0.03"),
-			Body:    body,
-		},
-	}, true)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to send message"})
-		return
-	}
-	json.NewEncoder(w).Encode(map[string]bool{"success": true})
-}
-
-func GetNFTData(w http.ResponseWriter, r *http.Request) {
-	client := liteclient.NewConnectionPool()
-
-	configUrl := os.Getenv("config_url")
-	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Error connections from config url"})
-		return
-	}
-
-	api := ton.NewAPIClient(client)
-
-	collectionAddr := address.MustParseAddr(os.Getenv("collection_address"))
-	collection := nft.NewCollectionClient(api, collectionAddr)
-
-	id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
-		return
-	}
-
-	nftAddr, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(id))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "invalid telegram id"})
-		return
-	}
-
-	newData, err := nft.NewItemClient(api, nftAddr).GetNFTData(context.Background())
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "failed to get nft data"})
-		return
-	}
-	
-
-	key := []byte(os.Getenv("AESKEY"))
-
-	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": utils.EncryptAES(key, nftAddr.String()), "content": newData.Content, "owner": newData.OwnerAddress.String()})
 }

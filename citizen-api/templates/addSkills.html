@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="ru">   <head>
+	<title>Citizen</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="static/css/style.min.css">
+	<link rel="shortcut icon" href="static/img/favico.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+</head>  <body>    <div class="site">      <div id="params_form" class="wrapper Skills__color">
+  <header class="add__header title">
+    <div class="add__header_tittle">Skills</div>
+    <div class="button_info text cursor__pointer" id="info_open">!!!</div>
+  </header>
+  <main class="page add_page">
+    <form class="add__form _container" method="post" action="/addskill">
+      <div class="form__block standartText">
+        Add property:
+        <input type="text" class="form__property standartText" name="skill_1" />
+      </div>
+      <div class="form__block standartText">
+        Add more:
+        <input type="text" class="form__property standartText" name="skill_2" />
+      </div>
+      <input type="text" name="id" value="{{ .id }}" hidden>
+      <div class="form__footer standartText">
+        <div>
+          <button type="submit" class="button button__white title disabled" id="add">Add</button>
+          <button class="button button__white title" onclick="history.back()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+  <footer class="footer">
+</footer>
+</div>
+      <div id="params_info" class="wrapper Skills__color" style="display: none">
+  <main class="page add_page">
+    <div class="_container">
+      <div class="text">
+        This section assigns <p class="bold" style="display: inline-block">skills</p>
+        and competencies that allow a person to effectively perform various tasks and achieve their goals. Skills can be either general or specialized, and can relate to different areas such as communication, leadership, creative thinking, time management, and many others.
+      </div>
+      <br />
+      <div class="text">
+        For example, generic skills may be communication, leadership, presentation, and time management skills that are important to work in any field of endeavor. Specialized skills may relate to a specific profession or field, such as programming, design, marketing, etc.
+      </div>
+      <br />
+      <div class="text">
+        Skill development is an important element of personal and professional development, and can occur through formal education and training as well as through self-study and practice. A combination of general and specialized skills can help a person do their job effectively, achieve their goals, and improve their skill level.
+      </div>
+
+      <div class="form__footer standartText">
+        <div>
+          <div id="form_open" class="button button__white title">
+            OK
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+    </div>    <script src="static/js/vendors.min.js"></script>
+<script src="static/js/app.min.js"></script>    <script src="static/js/add.min.js"></script>  </body></html>

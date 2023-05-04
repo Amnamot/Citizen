@@ -12,7 +12,6 @@ from tonsdk.contract.wallet import WalletVersionEnum, Wallets
 import aiohttp
 import base64
 from datetime import datetime
-from bot.utils.aes import encryptAES
 
 
 async def get_passport(call: types.CallbackQuery, state: FSMContext):
@@ -89,21 +88,22 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
             metadata["attributes"][5]["value"] = datetime.now(
             ).date().strftime('%d.%m.%Y')
             metadata["attributes"][6]["value"] = "Citizen"
-            key = os.getenv("AESKEY").encode()
+            key = os.getenv("KEY")
 
             await call.message.answer("wait for your passport to be minted")
             async with aiohttp.ClientSession() as session:
-                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id, "address": encryptAES(key, wallet[3].address.to_string(True, True, True).encode()), "content": metadata}) as resp:
+                async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id, "address": wallet[3].address.to_string(True, True, True), "content": metadata, "key": key}) as resp:
                     response = await resp.read()
 
 
                 if resp.status == 200:
                     async with db_session() as session:
                         user: User = await session.get(User, call.message.chat.id)
+                        user.content = json.dumps(metadata, indent = 4)
                         user.ispassport = True
                         await session.commit()
                     data = json.loads(response.decode())
-                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={data["nft_address"]}&content={data["content"]["URI"]}&owner={data["owner"]}'))))
+                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}/citizen'))))
                 else:
                     await state.set_state(FormStates.waiting_click_form)
                     await call.message.answer("Failed to mint passport try again")
@@ -115,14 +115,14 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
 
 
 async def man_select(call: types.CallbackQuery, state: FSMContext):
-    await state.update_data(gender="👨")
+    await state.update_data(gender="man")
     data = await state.get_data()
     await state.set_state(FormStates.waiting_click_form)
     await call.message.answer(form_text.format(data["first_name"] if "first_name" in data else "🚫", data["last_name"] if "last_name" in data else "🚫", data["gender"] if "gender" in data else "🚫", data["date_of_birth"] if "date_of_birth" in data else "🚫", "🖼" if "photo" in data else "🚫"), reply_markup=form_keyboard(), parse_mode="Markdown")
 
 
 async def woman_select(call: types.CallbackQuery, state: FSMContext):
-    await state.update_data(gender="👩")
+    await state.update_data(gender="woman")
     data = await state.get_data()
     await state.set_state(FormStates.waiting_click_form)
     await call.message.answer(form_text.format(data["first_name"] if "first_name" in data else "🚫", data["last_name"] if "last_name" in data else "🚫", data["gender"] if "gender" in data else "🚫", data["date_of_birth"] if "date_of_birth" in data else "🚫", "🖼" if "photo" in data else "🚫"), reply_markup=form_keyboard(), parse_mode="Markdown")

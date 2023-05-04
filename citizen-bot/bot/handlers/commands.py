@@ -1,4 +1,3 @@
-import json
 import os
 from aiogram import types, Dispatcher
 import aiohttp
@@ -9,7 +8,6 @@ from aiogram.dispatcher import FSMContext
 from bot.states import WalletStates
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from bot.db.models import User
-from bot.utils.aes import encryptAES
 
 
 async def cmd_start(message: types.Message, state: FSMContext):
@@ -44,7 +42,7 @@ async def cmd_wallet(message: types.Message, state: FSMContext):
 
 
 async def cmd_faq(message: types.Message):
-    await message.answer("FAQ", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("FAQ", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}FAQ.html'))))
+    await message.answer("FAQ", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("FAQ", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}'))))
 
 
 async def cmd_my(message: types.Message):
@@ -54,12 +52,7 @@ async def cmd_my(message: types.Message):
 
     if user:
         if user.ispassport:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f'{os.getenv("api_url")}/api/v1/getNFT/{message.chat.id}') as resp:
-                    response = await resp.read()
-            if resp.status == 200:
-                data = json.loads(response.decode())
-                await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}index.html?nft_address={data["nft_address"]}&content={data["content"]["URI"]}&owner={data["owner"]}'))))
+            await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}/citizen'))))
 
         else:
             await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())

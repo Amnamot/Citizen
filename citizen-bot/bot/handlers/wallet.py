@@ -10,7 +10,6 @@ from tonsdk.contract.wallet import WalletVersionEnum, Wallets
 from bot.common import cb_wallet, cb_common_btn
 from tonsdk.provider import prepare_address
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from bot.utils.aes import encryptAES
 
 async def deposit(call: types.CallbackQuery):
     db_session = call.message.bot.get("db")
@@ -81,7 +80,7 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
     key = os.getenv("AESKEY").encode()
     data = await state.get_data()
     async with aiohttp.ClientSession() as session:
-        async with session.post(f'{os.getenv("api_url")}/api/v1/transfer', json={"from": encryptAES(key, call.message.chat.id.encode()), "to": data["to_address"], "amount": data["amount"]}) as resp:
+        async with session.post(f'{os.getenv("api_url")}/api/v1/transfer', json={"from": call.message.chat.id, "to": data["to_address"], "amount": data["amount"], "key": key}) as resp:
             if resp.status == 200:
                 await call.message.answer("Funds will be credited within 2 minutes")
     await state.set_state(WalletStates.waiting_click_btn)
