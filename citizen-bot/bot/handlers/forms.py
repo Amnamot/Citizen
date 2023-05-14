@@ -103,7 +103,7 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
                         user.ispassport = True
                         await session.commit()
                     data = json.loads(response.decode())
-                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}/citizen'))))
+                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
                 else:
                     await state.set_state(FormStates.waiting_click_form)
                     await call.message.answer("Failed to mint passport try again")

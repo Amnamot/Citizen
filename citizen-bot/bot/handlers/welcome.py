@@ -7,7 +7,7 @@ from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 
 async def my_passport(call: types.CallbackQuery):
-    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}/citizen'))))
+    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
 
         
 
@@ -19,6 +19,8 @@ async def another_passport(call: types.CallbackQuery, state: FSMContext):
 
 async def pay_premium(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer("Comming Soon")
+
+
 
 def register_welcome(dp: Dispatcher):
     dp.register_callback_query_handler(my_passport, cb_welcome.filter(btn="my passport"), state=WelcomeStates.waiting_click_btn)

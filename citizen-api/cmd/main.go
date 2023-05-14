@@ -34,7 +34,7 @@ func main() {
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	err := http.ListenAndServe(":8000", router)
+	err := http.ListenAndServeTLS(":8000", "server.crt", "server.key", router)
 
 	if err != nil {
 		log.Fatal(err)
