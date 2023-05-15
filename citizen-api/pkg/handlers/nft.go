@@ -50,9 +50,9 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	key := []byte(os.Getenv("KEY"))
+	key := os.Getenv("KEY")
 
-	if (string(key) != data.Key){
+	if (key != data.Key){
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "bad request"})
 		return
