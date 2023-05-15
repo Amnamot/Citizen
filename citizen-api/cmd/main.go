@@ -30,11 +30,12 @@ func main() {
 
 	router.HandleFunc("/addattitude", handlers.Attitude).Methods("GET", "POST")
 
+	router.HandleFunc("/faq", handlers.FAQ).Methods("GET")
 	
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	err := http.ListenAndServeTLS(":8000", "server.crt", "server.key", router)
+	err := http.ListenAndServe(":8000", router)
 
 	if err != nil {
 		log.Fatal(err)

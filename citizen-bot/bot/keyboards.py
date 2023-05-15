@@ -1,23 +1,23 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram_datepicker.custom_action import DatepickerCustomAction
 
 from aiogram_datepicker.settings import DatepickerSettings
-from .common import cb_welcome, cb_form, cb_common_btn, cb_wallet, cb_gender
+from .common import cb_form, cb_common_btn, cb_wallet, cb_gender
 from datetime import datetime, date
 
 
-def welcome_keyboard(payed: bool) -> InlineKeyboardMarkup:
-    ik = InlineKeyboardMarkup()
-    ik.add(InlineKeyboardButton("View my passport 🪪", callback_data=cb_welcome.new(btn="my passport")),
-           InlineKeyboardButton("Find another passport 🔍", callback_data=cb_welcome.new(btn="another passport")))
-    ik.add(InlineKeyboardButton("Manage your subscription ✅", callback_data=cb_welcome.new(btn="suscription"))
-           if payed else InlineKeyboardButton("Pay premium 💳", callback_data=cb_welcome.new(btn="pay premium")))
+def welcome_keyboard(payed: bool) -> ReplyKeyboardMarkup:
+    ik = ReplyKeyboardMarkup(resize_keyboard=True)
+    ik.add(KeyboardButton("View my passport 🪪"),
+           KeyboardButton("Find another passport 🔍"))
+    ik.add(KeyboardButton("Manage your subscription ✅")
+           if payed else KeyboardButton("Pay premium 💳"))
     return ik
 
 
-def getpassport_keyboard() -> InlineKeyboardMarkup:
-    ik = InlineKeyboardMarkup().add(InlineKeyboardButton(
-        "Get passport 🪪", callback_data=cb_welcome.new(btn="get passport")))
+def getpassport_keyboard() -> ReplyKeyboardMarkup:
+    ik = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(
+        "Get passport 🪪"))
     return ik
 
 

@@ -30,63 +30,10 @@ async def cmd_start(message: types.Message, state: FSMContext):
     else:
         await create_user(message.chat.id, message.chat.username, db_session)
         await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
-
-
-async def cmd_wallet(message: types.Message, state: FSMContext):
-    await state.set_state(WalletStates.waiting_click_btn)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'{os.getenv("api_url")}/api/v1/getbalance/{message.chat.id}') as resp:
-            if resp.status == 200:
-                response = await resp.read()
-                await message.answer(f"Your balance is {response.decode().strip()[1:-1]} TON", reply_markup=wallet_keyboard())
-
-
-async def cmd_faq(message: types.Message):
-    await message.answer("FAQ", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("FAQ", web_app=WebAppInfo(url=f'{os.getenv("WEBAPP_URL")}'))))
-
-
-async def cmd_my(message: types.Message):
-    db_session = message.bot.get("db")
-
-    user = await get_user(message.chat.id, db_session)
-
-    if user:
-        if user.ispassport:
-            await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
-
-        else:
-            await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
-    else:
-        await create_user(message.chat.id, message.chat.username, db_session)
-        await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
-
-
-async def cmd_search(message: types.Message, state: FSMContext):
-    await state.set_state(SearchStates.input_username)
-    await message.answer("Enter username to search")
-
-
-async def cmd_premium(message: types.Message, state: FSMContext):
-    await message.answer("Comming Soon")
-
-
-async def cmd_edit(message: types.Message, state: FSMContext):
-    await message.answer("Comming Soon")
-
-
-async def cmd_donate(message: types.Message, state: FSMContext):
-    await message.answer("Comming Soon")
-
+    
 
 
 
 def register_commands(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start", state="*")
-    dp.register_message_handler(cmd_wallet, commands="wallet", state="*")
-    dp.register_message_handler(cmd_faq, commands="faq", state="*")
-    dp.register_message_handler(cmd_my, commands="my", state="*")
-    dp.register_message_handler(cmd_search, commands="search", state="*")
-    dp.register_message_handler(cmd_premium, commands="premium", state="*")
-    dp.register_message_handler(cmd_edit, commands="edit", state="*")
-    dp.register_message_handler(cmd_donate, commands="donate", state="*")
     

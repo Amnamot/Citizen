@@ -2,34 +2,14 @@ import os
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
-from aiogram.types import BotCommand
-from aiogram.types.bot_command_scope import BotCommandScopeDefault
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from bot.handlers.commands import register_commands
-from bot.handlers.forms import register_forms
-from bot.handlers.search import register_search
-from bot.handlers.wallet import register_wallet
-from bot.handlers.welcome import register_welcome
+from bot.handlers.get_passport import register_get_passport
 from dotenv import load_dotenv
 
 load_dotenv()
-
-async def set_bot_commands(bot: Bot):
-
-    commands = [
-        BotCommand(command="my", description="My pasport"),
-        BotCommand(command="requests", description="Verification requests"),
-        BotCommand(command="search", description="Find a pasport"),
-        BotCommand(command="premium", description="Premium"),
-        BotCommand(command="faq", description="FAQ"),
-        BotCommand(command="donate", description="Donate"),
-        BotCommand(command="edit", description="Edit data"),
-        BotCommand(command="wallet", description="Wallet"),
-    ]
-
-    await bot.set_my_commands(commands, scope=BotCommandScopeDefault())
 
 
 async def main():
@@ -53,12 +33,8 @@ async def main():
     dp = Dispatcher(bot, storage=MemoryStorage())
 
     register_commands(dp)
-    register_forms(dp)
-    register_search(dp)
-    register_wallet(dp)
-    register_welcome(dp)
 
-    await set_bot_commands(bot)
+    register_get_passport(dp)
 
     await dp.start_polling()
 
