@@ -11,6 +11,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	initdata "github.com/Telegram-Web-Apps/init-data-golang"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/liteclient"
@@ -21,12 +24,12 @@ import (
 	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
-func Index(w http.ResponseWriter, r *http.Request){
+func Index(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": []interface{}{r.RequestURI, r.URL.Fragment}})
 		return
 	}
 
@@ -77,8 +80,7 @@ func Index(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-
-	if (isedit) {
+	if isedit {
 		content, err := json.Marshal(metadata)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -133,14 +135,13 @@ func Index(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-		
 	}
 
 	data := Content{}
 
 	dec := json.NewDecoder(strings.NewReader(metadata))
 	_ = dec.Decode(&data)
- 
+
 	err = ts.Execute(w, data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -149,15 +150,14 @@ func Index(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-
-func FAQ(w http.ResponseWriter, r *http.Request){
+func FAQ(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./templates/FAQ.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
 	}
- 
+
 	err = ts.Execute(w, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -166,9 +166,8 @@ func FAQ(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-
-func Vices(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func Vices(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 		if err != nil {
@@ -201,7 +200,7 @@ func Vices(w http.ResponseWriter, r *http.Request){
 		}
 
 		data["id"] = id
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -232,7 +231,6 @@ func Vices(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -242,19 +240,17 @@ func Vices(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (vice_1 != ""){
+		if vice_1 != "" {
 			if data.Vices[vice_1] == nil {
 				data.Vices[vice_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (vice_2 != ""){
+		if vice_2 != "" {
 			if data.Vices[vice_2] == nil {
 				data.Vices[vice_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -264,7 +260,6 @@ func Vices(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -273,17 +268,13 @@ func Vices(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-
-
-func SocialTies(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func SocialTies(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addSocialTies.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -311,7 +302,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 		}
 
 		data["username"] = username
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -342,7 +333,6 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -352,8 +342,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (username != "" && role != ""){
+		if username != "" && role != "" {
 			var tg_id int
 			err = dbpool.QueryRow(context.Background(), "SELECT telegram_id FROM users WHERE username=$1", username).Scan(&tg_id)
 			if err != nil {
@@ -364,7 +353,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 			if data.Ties[username] == nil {
 				data.Ties[username] = map[string]interface{}{"role": role, "id": tg_id}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -374,7 +363,6 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -383,16 +371,13 @@ func SocialTies(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-
-func Skills(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET") {
+func Skills(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 		if err != nil {
@@ -411,7 +396,7 @@ func Skills(w http.ResponseWriter, r *http.Request){
 		data := make(map[string]interface{})
 
 		data["id"] = id
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -442,7 +427,6 @@ func Skills(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -452,19 +436,17 @@ func Skills(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (skill_1 != ""){
+		if skill_1 != "" {
 			if data.Skills[skill_1] == nil {
 				data.Skills[skill_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (skill_2 != ""){
+		if skill_2 != "" {
 			if data.Skills[skill_2] == nil {
 				data.Skills[skill_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -474,7 +456,6 @@ func Skills(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -483,15 +464,13 @@ func Skills(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-func Morality(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func Morality(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addMorality.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -512,7 +491,7 @@ func Morality(w http.ResponseWriter, r *http.Request){
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -543,7 +522,6 @@ func Morality(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -553,19 +531,17 @@ func Morality(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (morality_1 != ""){
+		if morality_1 != "" {
 			if data.Moralities[morality_1] == nil {
 				data.Moralities[morality_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (morality_2 != ""){
+		if morality_2 != "" {
 			if data.Moralities[morality_2] == nil {
 				data.Moralities[morality_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -575,7 +551,6 @@ func Morality(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -584,16 +559,13 @@ func Morality(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-
-func Emotions(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func Emotions(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addEmotions.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -614,7 +586,7 @@ func Emotions(w http.ResponseWriter, r *http.Request){
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -645,7 +617,6 @@ func Emotions(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -655,19 +626,17 @@ func Emotions(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (emotion_1 != ""){
+		if emotion_1 != "" {
 			if data.Emotions[emotion_1] == nil {
 				data.Emotions[emotion_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (emotion_2 != ""){
+		if emotion_2 != "" {
 			if data.Emotions[emotion_2] == nil {
 				data.Emotions[emotion_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -677,7 +646,6 @@ func Emotions(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -686,15 +654,13 @@ func Emotions(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-func Characters(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func Characters(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addCharacters.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -715,7 +681,7 @@ func Characters(w http.ResponseWriter, r *http.Request){
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -746,7 +712,6 @@ func Characters(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -756,19 +721,17 @@ func Characters(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (character_1 != ""){
+		if character_1 != "" {
 			if data.Characters[character_1] == nil {
 				data.Characters[character_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (character_2 != ""){
+		if character_2 != "" {
 			if data.Characters[character_2] == nil {
 				data.Characters[character_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -778,7 +741,6 @@ func Characters(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -787,16 +749,13 @@ func Characters(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
-
-func Attitude(w http.ResponseWriter, r *http.Request){
-	if (r.Method == "GET"){
+func Attitude(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addAttitude.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -817,7 +776,7 @@ func Attitude(w http.ResponseWriter, r *http.Request){
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
-	
+
 		err = ts.Execute(w, data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -848,7 +807,6 @@ func Attitude(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		data := Content{}
 
 		err = json.Unmarshal([]byte(content), &data)
@@ -858,19 +816,17 @@ func Attitude(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
-		if (attidude_1 != ""){
+		if attidude_1 != "" {
 			if data.Attitudes[attidude_1] == nil {
 				data.Attitudes[attidude_1] = []int{0, 0, 0}
 			}
-		} 
+		}
 
-
-		if (attidude_2 != ""){
+		if attidude_2 != "" {
 			if data.Attitudes[attidude_2] == nil {
 				data.Attitudes[attidude_2] = []int{0, 0, 0}
 			}
-		} 
+		}
 
 		j, err := json.Marshal(data)
 
@@ -880,7 +836,6 @@ func Attitude(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
-
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
@@ -889,18 +844,35 @@ func Attitude(w http.ResponseWriter, r *http.Request){
 			return
 		}
 
+		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
 
-		http.Redirect(w, r, "http://127.0.0.1:8000/citizen", http.StatusSeeOther)
-		
-		
 	}
 }
 
+func Validate(w http.ResponseWriter, r *http.Request) {
+	err := initdata.Validate(r.URL.Query().Get("initData"), os.Getenv("BOT"), time.Hour)
 
+	w.WriteHeader(http.StatusOK)
 
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{"result": false})
+	} else {
+		json.NewEncoder(w).Encode(map[string]interface{}{"result": true})
+	}
+}
 
+func Warning(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./templates/warning.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
 
-
-
-
-
+	err = ts.Execute(w, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
+}

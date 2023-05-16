@@ -107,6 +107,7 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
                     data = json.loads(response.decode())
                     await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
                 else:
+                    print(response.decode())
                     await state.set_state(FormStates.waiting_click_form)
                     await call.message.answer("Failed to mint passport try again")
                     await call.message.answer(form_text.format(data["first_name"] if "first_name" in data else "🚫", data["last_name"] if "last_name" in data else "🚫", data["gender"] if "gender" in data else "🚫", data["date_of_birth"] if "date_of_birth" in data else "🚫", "🖼" if "photo" in data else "🚫"), reply_markup=form_keyboard(), parse_mode="Markdown")

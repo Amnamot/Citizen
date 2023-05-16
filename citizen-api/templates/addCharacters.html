@@ -87,4 +87,23 @@
   </main>
 </div>
     </div>    <script src="static/js/vendors.min.js"></script>
-<script src="static/js/app.min.js"></script>    <script src="static/js/add.min.js"></script>  </body></html>
+<script src="static/js/app.min.js"></script>    <script src="static/js/add.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    var WebApp = window.Telegram.WebApp;
+    let xhrURL = new URL('https://citizen.cool/validate');
+    xhrURL.searchParams.set('initData', WebApp.initData);
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', xhrURL);
+    xhr.responseType = 'json'; 
+    xhr.setRequestHeader("Content-Type", "application/json"); 
+    xhr.send();
+    xhr.onload = function() {
+        if (xhr.status == 200){
+          if (xhr.response.result == false){
+            window.location.href = "https://citizen.cool/warning"
+          }
+        }
+    }
+  </script>  </body></html>

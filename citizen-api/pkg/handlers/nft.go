@@ -54,7 +54,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	if (key != data.Key){
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"error": "bad request"})
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "bad request", "detail": map[string]string{"key": key, "data_key": data.Key}})
 		return
 	}
 

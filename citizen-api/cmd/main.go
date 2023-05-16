@@ -2,12 +2,19 @@ package main
 
 import (
 	"citizen-api/pkg/handlers"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 
 	router := mux.NewRouter()
@@ -31,11 +38,15 @@ func main() {
 	router.HandleFunc("/addattitude", handlers.Attitude).Methods("GET", "POST")
 
 	router.HandleFunc("/faq", handlers.FAQ).Methods("GET")
+
+	router.HandleFunc("/warning", handlers.Warning).Methods("GET")
+
+	router.HandleFunc("/validate", handlers.Validate).Methods("GET")
 	
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	err := http.ListenAndServe(":8000", router)
+	err = http.ListenAndServe(":8000", router)
 
 	if err != nil {
 		log.Fatal(err)

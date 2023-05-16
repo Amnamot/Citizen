@@ -8,7 +8,7 @@ from aiogram.dispatcher import FSMContext
 from bot.states import WalletStates
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from bot.db.models import User
-
+from aiogram.dispatcher.filters import Text
 
 async def cmd_start(message: types.Message, state: FSMContext):
     db_session = message.bot.get("db")
@@ -30,10 +30,14 @@ async def cmd_start(message: types.Message, state: FSMContext):
     else:
         await create_user(message.chat.id, message.chat.username, db_session)
         await message.answer("We are pleased to welcome you!\nYou do not have a passport yet.\nIn the web 3.0 world you will definitely need one.", reply_markup=getpassport_keyboard())
-    
+
+
+async def my_passport(message: types.Message):
+    await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
+
 
 
 
 def register_commands(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start", state="*")
-    
+    dp.register_message_handler(my_passport, (Text(equals="Get passport 🪪")), state="*")
