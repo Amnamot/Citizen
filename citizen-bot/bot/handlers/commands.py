@@ -40,4 +40,4 @@ async def my_passport(message: types.Message):
 
 def register_commands(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start", state="*")
-    dp.register_message_handler(my_passport, (Text(equals="Get passport 🪪")), state="*")
+    dp.register_message_handler(my_passport, (Text(equals="View my passport 🪪")), state=WelcomeStates.waiting_click_btn)
