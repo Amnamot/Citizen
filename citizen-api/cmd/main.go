@@ -13,14 +13,12 @@ import (
 func main() {
 	utils.InitLogger()
 
-	//utils.CtznLog.CreateFileIfNotExists()
 	logrus.Println("[APP START]")
 
 	err := godotenv.Load()
 	if err != nil {
 		logrus.Println(err.Error())
-		// TODO uncomment
-		//log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
 
 
