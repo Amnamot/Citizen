@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"strings"
@@ -10,6 +11,7 @@ func savecontent(content []byte) error {
 	f, err := os.Create("content.json")
 
 	if err != nil {
+		logrus.Println(err.Error())
 		return err
 	}
 
@@ -18,6 +20,7 @@ func savecontent(content []byte) error {
 	_, err = f.Write(content)
 
 	if err != nil {
+		logrus.Println(err.Error())
 		return err
 	}
 	return nil
@@ -28,10 +31,12 @@ func savecontent(content []byte) error {
 func UploadContent(content []byte) (string, error) {
 	err := savecontent(content)
 	if err != nil {
+		logrus.Println(err.Error())
 		return "", err
 	}
 	out, err := exec.Command("bundlr", "upload", "content.json", "-h", "https://node1.bundlr.network", "-w", "wallet.json", "-c", "arweave").Output()
 	if err != nil {
+		logrus.Println(err.Error())
 		return "", err
 	}
 	s := strings.Split(string(out), " ")
@@ -43,6 +48,7 @@ func saveimg(img string) error {
 	f, err := os.Create("img.txt")
 
 	if err != nil {
+		logrus.Println(err.Error())
 		return err
 	}
 
@@ -51,6 +57,7 @@ func saveimg(img string) error {
 	_, err = f.WriteString(img)
 
 	if err != nil {
+		logrus.Println(err.Error())
 		return err
 	}
 	return nil
@@ -60,10 +67,12 @@ func saveimg(img string) error {
 func UploadImg(img string) (string, error) {
 	err := saveimg(img)
 	if err != nil {
+		logrus.Println(err.Error())
 		return "", err
 	}
 	out, err := exec.Command("bundlr", "upload", "img.txt", "-h", "https://node1.bundlr.network", "-w", "wallet.json", "-c", "arweave").Output()
 	if err != nil {
+		logrus.Println(err.Error())
 		return "", err
 	}
 	s := strings.Split(string(out), " ")

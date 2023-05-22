@@ -4,6 +4,7 @@ import (
 	"citizen-api/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"html/template"
 	"math/big"
 	"math/rand"
@@ -28,6 +29,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": []interface{}{r.RequestURI, r.URL.Fragment}})
 		return
@@ -35,6 +37,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles("./templates/index.html")
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -42,6 +45,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -53,6 +57,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	err = dbpool.QueryRow(context.Background(), "SELECT isedit, content FROM users WHERE telegram_id=$1", id).Scan(&isedit, &metadata)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -63,6 +68,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -75,6 +81,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	nftAddr, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(id))
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -83,6 +90,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if isedit {
 		content, err := json.Marshal(metadata)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -90,6 +98,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		url, err := utils.UploadContent(content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -99,6 +108,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		wall := utils.GetWallet(api, os.Getenv("SEED"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -123,6 +133,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			},
 		}, true)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -130,6 +141,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET isedit = FALSE WHERE telegram_id = '$1'`, id)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -144,6 +156,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	err = ts.Execute(w, data)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
@@ -153,6 +166,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func FAQ(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./templates/FAQ.html")
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
@@ -160,6 +174,7 @@ func FAQ(w http.ResponseWriter, r *http.Request) {
 
 	err = ts.Execute(w, nil)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
@@ -171,6 +186,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -178,6 +194,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		ts, err := template.ParseFiles("./templates/addVices.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -187,6 +204,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		file, err := os.ReadFile("data.json")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -194,6 +212,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(string(file)), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -203,6 +222,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -216,6 +236,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -226,6 +247,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -235,6 +257,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -255,6 +278,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -263,6 +287,7 @@ func Vices(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -277,6 +302,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addSocialTies.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -286,6 +312,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -296,6 +323,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT username FROM users").Scan(&username)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -305,6 +333,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -318,6 +347,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -328,6 +358,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -337,6 +368,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -346,6 +378,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 			var tg_id int
 			err = dbpool.QueryRow(context.Background(), "SELECT telegram_id FROM users WHERE username=$1", username).Scan(&tg_id)
 			if err != nil {
+				logrus.Println(err.Error())
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 				return
@@ -358,6 +391,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -366,6 +400,7 @@ func SocialTies(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -381,6 +416,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -388,6 +424,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 
 		ts, err := template.ParseFiles("./templates/addSkills.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -399,6 +436,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -412,6 +450,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -422,6 +461,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -431,6 +471,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -451,6 +492,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -459,6 +501,7 @@ func Skills(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -473,6 +516,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addMorality.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -481,12 +525,14 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 		var data map[string][]string
 		file, err := os.ReadFile("data.json")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
 		err = json.Unmarshal([]byte(string(file)), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -494,6 +540,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -507,6 +554,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -517,6 +565,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -526,6 +575,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -546,6 +596,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -554,6 +605,7 @@ func Morality(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -568,6 +620,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addEmotions.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -576,12 +629,14 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 		var data map[string][]string
 		file, err := os.ReadFile("data.json")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
 		err = json.Unmarshal([]byte(string(file)), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -589,6 +644,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -602,6 +658,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -612,6 +669,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -621,6 +679,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -641,6 +700,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -649,6 +709,7 @@ func Emotions(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -663,6 +724,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addCharacters.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -671,12 +733,14 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 		var data map[string][]string
 		file, err := os.ReadFile("data.json")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
 		err = json.Unmarshal([]byte(string(file)), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -684,6 +748,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -697,6 +762,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -707,6 +773,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -716,6 +783,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -736,6 +804,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -744,6 +813,7 @@ func Characters(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -758,6 +828,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./templates/addAttitude.html")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -766,12 +837,14 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 		var data map[string][]string
 		file, err := os.ReadFile("data.json")
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
 		}
 		err = json.Unmarshal([]byte(string(file)), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -779,6 +852,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 
 		err = ts.Execute(w, data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -792,6 +866,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 
 		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -802,6 +877,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 
 		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -811,6 +887,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(content), &data)
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -831,6 +908,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 		j, err := json.Marshal(data)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -839,6 +917,7 @@ func Attitude(w http.ResponseWriter, r *http.Request) {
 		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
 
 		if err != nil {
+			logrus.Println(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 			return
@@ -855,6 +934,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if err != nil {
+		logrus.Println(err.Error())
 		json.NewEncoder(w).Encode(map[string]interface{}{"result": false})
 	} else {
 		json.NewEncoder(w).Encode(map[string]interface{}{"result": true})
@@ -864,6 +944,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 func Warning(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./templates/warning.html")
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
@@ -871,6 +952,7 @@ func Warning(w http.ResponseWriter, r *http.Request) {
 
 	err = ts.Execute(w, nil)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
