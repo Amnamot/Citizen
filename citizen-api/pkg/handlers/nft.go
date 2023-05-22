@@ -4,6 +4,7 @@ import (
 	"citizen-api/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/tlb"
@@ -45,6 +46,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	var data NFTData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
@@ -52,7 +54,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	key := os.Getenv("KEY")
 
-	if (key != data.Key){
+	if key != data.Key {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "bad request", "detail": map[string]string{"key": key, "data_key": data.Key}})
 		return
@@ -60,6 +62,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	url, err := utils.UploadImg(data.Photo)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
 		return
@@ -69,12 +72,14 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	content, err := json.Marshal(data.Metadata)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
 	url, err = utils.UploadContent(content)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed upload bundlr"})
 		return
@@ -87,6 +92,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 	configUrl := os.Getenv("config_url")
 	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Error connections from config url"})
 		return
@@ -100,6 +106,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	nftAddress, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(data.ID))
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to get nft data by index"})
 		return
@@ -109,6 +116,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		URI: spliturl[len(spliturl)-1],
 	})
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
@@ -118,6 +126,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	err = wall.Send(context.Background(), mint, true)
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "failed to send msg"})
 		return
@@ -126,6 +135,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 
 	newData, err := nft.NewItemClient(api, nftAddress).GetNFTData(context.Background())
 	if err != nil {
+		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal error"})
 		return

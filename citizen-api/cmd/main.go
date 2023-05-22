@@ -2,18 +2,25 @@ package main
 
 import (
 	"citizen-api/pkg/handlers"
-	"log"
-	"net/http"
-
+	"citizen-api/pkg/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
+	"log"
+	"net/http"
 )
 
 func main() {
+	utils.InitLogger()
+
+	//utils.CtznLog.CreateFileIfNotExists()
+	logrus.Println("[APP START]")
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		logrus.Println(err.Error())
+		// TODO uncomment
+		//log.Fatal("Error loading .env file")
 	}
 
 
@@ -49,9 +56,10 @@ func main() {
 	err = http.ListenAndServe(":8000", router)
 
 	if err != nil {
+		logrus.Println(err.Error())
 		log.Fatal(err)
 	}
 
-	log.Println("http://127.0.0.1:8000")
+	logrus.Println("[APP FINISHED]")
 
 }
