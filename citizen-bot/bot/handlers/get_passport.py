@@ -105,7 +105,7 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
                         user.ispassport = True
                         await session.commit()
                     data = json.loads(response.decode())
-                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}'))))
+                    await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={call.message.chat.id}'))))
                 else:
                     print(response.decode())
                     await state.set_state(FormStates.waiting_click_form)

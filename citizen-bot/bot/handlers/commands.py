@@ -1,11 +1,9 @@
 import os
 from aiogram import types, Dispatcher
-import aiohttp
 from bot.db.models import get_user, create_user
 from bot.keyboards import welcome_keyboard, getpassport_keyboard, wallet_keyboard
-from bot.states import WelcomeStates, SearchStates
+from bot.states import WelcomeStates
 from aiogram.dispatcher import FSMContext
-from bot.states import WalletStates
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from bot.db.models import User
 from aiogram.dispatcher.filters import Text
