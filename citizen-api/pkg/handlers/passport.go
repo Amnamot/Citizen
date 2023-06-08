@@ -1,29 +1,36 @@
 package handlers
 
 import (
-	"citizen-api/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"html/template"
 	"math/big"
-	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+
 	"time"
+	"github.com/sirupsen/logrus"
+	"github.com/xssnick/tonutils-go/address"
+	"github.com/xssnick/tonutils-go/liteclient"
+	"github.com/xssnick/tonutils-go/ton"
+	"github.com/xssnick/tonutils-go/ton/nft"
 
 	initdata "github.com/Telegram-Web-Apps/init-data-golang"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/xssnick/tonutils-go/address"
-	"github.com/xssnick/tonutils-go/liteclient"
-	"github.com/xssnick/tonutils-go/tlb"
-	"github.com/xssnick/tonutils-go/ton"
-	"github.com/xssnick/tonutils-go/ton/nft"
-	"github.com/xssnick/tonutils-go/ton/wallet"
-	"github.com/xssnick/tonutils-go/tvm/cell"
 )
+
+const (
+	base_url = "http://127.0.0.1:8000"
+)
+
+// var questionKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+//     tgbotapi.NewInlineKeyboardRow(
+//         tgbotapi.NewInlineKeyboardButtonData("Yes", "Yes"),
+//         tgbotapi.NewInlineKeyboardButtonData("No", "No"),
+//         tgbotapi.NewInlineKeyboardButtonData("Ignore", "Ignore"),
+//     ),
+// )
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
@@ -31,7 +38,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": []interface{}{r.RequestURI, r.URL.Fragment}})
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
 	}
 
@@ -53,9 +60,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	defer dbpool.Close()
 
 	var metadata string
-	var isedit bool
+	var points int
 
-	err = dbpool.QueryRow(context.Background(), "SELECT isedit, content FROM users WHERE telegram_id=$1", id).Scan(&isedit, &metadata)
+	err = dbpool.QueryRow(context.Background(), "SELECT action_points, content FROM users WHERE id=$1", id).Scan(&points, &metadata)
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -63,15 +70,227 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := liteclient.NewConnectionPool()
+	var data map[string]interface{}
 
-	configUrl := os.Getenv("config_url")
-	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
+	json.Unmarshal([]byte(metadata), &data)
+
+
+	rows, err := dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM vices WHERE user_id=$1", id)
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
 		return
+	}
+
+	vices := make(map[string]interface{})
+
+	for rows.Next() {
+		var vice string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&vice, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    vices[vice] = []int{yes, no, ignore}
+	}
+
+	data["vices"] = vices
+
+	rows, err = dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM emotions WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	emotions := make(map[string]interface{})
+
+	for rows.Next() {
+		var emotion string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&emotion, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    emotions[emotion] = []int{yes, no, ignore}
+	}
+
+	data["emotions"] = emotions
+
+
+	rows, err = dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM skills WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	skills := make(map[string]interface{})
+
+	for rows.Next() {
+		var skill string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&skill, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    skills[skill] = []int{yes, no, ignore}
+	}
+
+	data["skills"] = skills
+
+
+	rows, err = dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM attitudes WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	attitudes := make(map[string]interface{})
+
+	for rows.Next() {
+		var attitude string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&attitude, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    attitudes[attitude] = []int{yes, no, ignore}
+	}
+
+	data["attitudes"] = attitudes
+
+
+	rows, err = dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM characters WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	characters := make(map[string]interface{})
+
+	for rows.Next() {
+		var character string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&character, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    characters[character] = []int{yes, no, ignore}
+	}
+
+	data["characters"] = characters
+
+
+	rows, err = dbpool.Query(context.Background(), "SELECT name, yes, no, ignore FROM moralities WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	moralities := make(map[string]interface{})
+
+	for rows.Next() {
+		var morality string
+		var yes int
+		var no int
+		var ignore int
+		err := rows.Scan(&morality, &yes, &no, &ignore)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    moralities[morality] = []int{yes, no, ignore}
+	}
+
+	data["moralities"] = moralities
+
+
+	rows, err = dbpool.Query(context.Background(), "SELECT social_username, role FROM socials WHERE user_id=$1", id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	socials := make(map[string]interface{})
+
+	for rows.Next() {
+		var username string
+		var role string
+		err := rows.Scan(&username, &role)
+		if err != nil {
+			logrus.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+			return
+		}
+	    socials[username] = role
+	}
+
+	data["ties"] = socials
+
+
+	file, err := os.ReadFile("data.json")
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
+
+	var c map[string]interface{}
+
+	err = json.Unmarshal([]byte(string(file)), &c)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
+
+	client := liteclient.NewConnectionPool()
+
+	err = client.AddConnectionsFromConfigUrl(context.Background(), "https://ton-blockchain.github.io/testnet-global.config.json")
+	if err != nil {
+		panic(err)
 	}
 
 	api := ton.NewAPIClient(client)
@@ -79,86 +298,29 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	collectionAddr := address.MustParseAddr(os.Getenv("collection_address"))
 	collection := nft.NewCollectionClient(api, collectionAddr)
 
+
+	if err != nil {
+		panic(err)
+	}
+
 	nftAddr, err := collection.GetNFTAddressByIndex(context.Background(), big.NewInt(id))
 	if err != nil {
-		logrus.Println(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
-		return
+		panic(err)
 	}
 
-	if isedit {
-		content, err := json.Marshal(metadata)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
+	data["nft_address"] = nftAddr.String()
 
-		url, err := utils.UploadContent(content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
+	data["display_address"] = nftAddr.String()[:4] + "..." + nftAddr.String()[len(nftAddr.String())-4:]
 
-		spliturl := strings.Split(url, "/")
+	data["points"] = points
 
-		wall := utils.GetWallet(api, os.Getenv("SEED"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		body := cell.BeginCell().
-			MustStoreUInt(0x1a0b9d51, 32).
-			MustStoreUInt(rand.Uint64(), 64).
-			MustStoreRef(
-				cell.BeginCell().
-					MustStoreStringSnake(spliturl[len(spliturl)-1]).
-					EndCell(),
-			).EndCell()
-
-		err = wall.Send(context.Background(), &wallet.Message{
-			Mode: 1,
-			InternalMessage: &tlb.InternalMessage{
-				Bounce:  true,
-				DstAddr: nftAddr,
-				Amount:  tlb.MustFromTON("0.03"),
-				Body:    body,
-			},
-		}, true)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET isedit = FALSE WHERE telegram_id = '$1'`, id)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-	}
-
-	data := Content{}
-
-	dec := json.NewDecoder(strings.NewReader(metadata))
-	_ = dec.Decode(&data)
+	data["role"] = c["role"]
 
 	err = ts.Execute(w, data)
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
 	}
 }
@@ -178,753 +340,6 @@ func FAQ(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
 		return
-	}
-}
-
-func Vices(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		ts, err := template.ParseFiles("./templates/addVices.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		var data map[string]interface{}
-
-		file, err := os.ReadFile("data.json")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		err = json.Unmarshal([]byte(string(file)), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data["id"] = id
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		vice_1 := r.FormValue("vice_1")
-		vice_2 := r.FormValue("vice_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if vice_1 != "" {
-			if data.Vices[vice_1] == nil {
-				data.Vices[vice_1] = []int{0, 0, 0}
-			}
-		}
-
-		if vice_2 != "" {
-			if data.Vices[vice_2] == nil {
-				data.Vices[vice_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func SocialTies(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./templates/addSocialTies.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := make(map[string][]string)
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var username []string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT username FROM users").Scan(&username)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data["username"] = username
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		username := r.FormValue("username")
-		role := r.FormValue("role")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if username != "" && role != "" {
-			var tg_id int
-			err = dbpool.QueryRow(context.Background(), "SELECT telegram_id FROM users WHERE username=$1", username).Scan(&tg_id)
-			if err != nil {
-				logrus.Println(err.Error())
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-				return
-			}
-			if data.Ties[username] == nil {
-				data.Ties[username] = map[string]interface{}{"role": role, "id": tg_id}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func Skills(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		ts, err := template.ParseFiles("./templates/addSkills.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := make(map[string]interface{})
-
-		data["id"] = id
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		skill_1 := r.FormValue("skill_1")
-		skill_2 := r.FormValue("skill_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if skill_1 != "" {
-			if data.Skills[skill_1] == nil {
-				data.Skills[skill_1] = []int{0, 0, 0}
-			}
-		}
-
-		if skill_2 != "" {
-			if data.Skills[skill_2] == nil {
-				data.Skills[skill_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func Morality(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./templates/addMorality.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		var data map[string][]string
-		file, err := os.ReadFile("data.json")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		err = json.Unmarshal([]byte(string(file)), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		morality_1 := r.FormValue("morality_1")
-		morality_2 := r.FormValue("morality_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if morality_1 != "" {
-			if data.Moralities[morality_1] == nil {
-				data.Moralities[morality_1] = []int{0, 0, 0}
-			}
-		}
-
-		if morality_2 != "" {
-			if data.Moralities[morality_2] == nil {
-				data.Moralities[morality_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func Emotions(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./templates/addEmotions.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		var data map[string][]string
-		file, err := os.ReadFile("data.json")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		err = json.Unmarshal([]byte(string(file)), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		emotion_1 := r.FormValue("emotion_1")
-		emotion_2 := r.FormValue("emotion_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if emotion_1 != "" {
-			if data.Emotions[emotion_1] == nil {
-				data.Emotions[emotion_1] = []int{0, 0, 0}
-			}
-		}
-
-		if emotion_2 != "" {
-			if data.Emotions[emotion_2] == nil {
-				data.Emotions[emotion_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func Characters(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./templates/addCharacters.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		var data map[string][]string
-		file, err := os.ReadFile("data.json")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		err = json.Unmarshal([]byte(string(file)), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		character_1 := r.FormValue("character_1")
-		character_2 := r.FormValue("character_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if character_1 != "" {
-			if data.Characters[character_1] == nil {
-				data.Characters[character_1] = []int{0, 0, 0}
-			}
-		}
-
-		if character_2 != "" {
-			if data.Characters[character_2] == nil {
-				data.Characters[character_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
-	}
-}
-
-func Attitude(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./templates/addAttitude.html")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		var data map[string][]string
-		file, err := os.ReadFile("data.json")
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		err = json.Unmarshal([]byte(string(file)), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		err = ts.Execute(w, data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-	} else {
-
-		attidude_1 := r.FormValue("attidude_1")
-		attidude_2 := r.FormValue("attidude_2")
-
-		id := r.FormValue("id")
-
-		dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-		defer dbpool.Close()
-
-		var content string
-
-		err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE telegram_id=$1", id).Scan(&content)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		data := Content{}
-
-		err = json.Unmarshal([]byte(content), &data)
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		if attidude_1 != "" {
-			if data.Attitudes[attidude_1] == nil {
-				data.Attitudes[attidude_1] = []int{0, 0, 0}
-			}
-		}
-
-		if attidude_2 != "" {
-			if data.Attitudes[attidude_2] == nil {
-				data.Attitudes[attidude_2] = []int{0, 0, 0}
-			}
-		}
-
-		j, err := json.Marshal(data)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		_, err = dbpool.Exec(context.Background(), `UPDATE users SET content = $1 WHERE telegram_id = $2`, j, id)
-
-		if err != nil {
-			logrus.Println(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-			return
-		}
-
-		http.Redirect(w, r, "https://citizen.cool/", http.StatusSeeOther)
-
 	}
 }
 
@@ -958,3 +373,45 @@ func Warning(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func CheckTies(w http.ResponseWriter, r *http.Request){
+
+}
+
+
+func GetProfile(w http.ResponseWriter, r *http.Request) {
+
+	username := r.URL.Query().Get("username")
+
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+	defer dbpool.Close()
+
+	var metadata string
+
+	err = dbpool.QueryRow(context.Background(), "SELECT content FROM users WHERE username=$1", username).Scan(&metadata)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+
+	var data map[string]interface{}
+
+
+	json.Unmarshal([]byte(metadata), &data)
+
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"result": data})
+
+
+
+
+}
+

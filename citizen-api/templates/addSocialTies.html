@@ -16,12 +16,23 @@
     <form class="add__form _container" method="post" action="/addsocialtie">
       <div class="form__block standartText">
         Telegram username:
-        <select id="combobox" class="form__socialRole standartText" name="username"></select>
+        <select id="combobox" class="form__socialRole standartText" name="username">
+          <option value=""></option>
+          {{ range .usernames}}
+          <option value="{{.}}">{{.}}</option>
+          {{ end }}
+        </select>
       </div>
       <div class="form__block standartText">
         Social role:
-        <select id="combobox" class="form__socialRole standartText" name="role"></select>
+        <select id="combobox" class="form__socialRole standartText" name="role">
+          <option value=""></option>
+          {{ range .role}}
+          <option value="{{.}}">{{.}}</option>
+          {{ end }}
+        </select>
       </div>
+      <input type="text" name="id" value="{{ .id }}" hidden>
       <div class="form__footer standartText">
         <div>
           <button type="submit" class="button button__white title disabled" id="add">Add</button>

@@ -225,5 +225,12 @@
         "Neutral",
         "Decadent",
         "Negative"
+    ],
+    "role": [
+        "Mother",
+        "Father",
+        "Friend",
+        "Colleague",
+        "Brother"
     ]
 }

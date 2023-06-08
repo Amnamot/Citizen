@@ -31,11 +31,15 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 async def my_passport(message: types.Message):
-    await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
+    await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
 
+async def social(message: types.Message):
+    await message.answer("If you know this user, you can confirm this social connection by going to your passport or ignore", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
 
 
 
 def register_commands(dp: Dispatcher):
     dp.register_message_handler(cmd_start, commands="start", state="*")
     dp.register_message_handler(my_passport, (Text(equals="View my passport 🪪")), state=WelcomeStates.waiting_click_btn)
+    dp.register_message_handler(social, (Text(contains="The user with the username")), state="*")
+    

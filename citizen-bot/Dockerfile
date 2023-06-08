@@ -7,6 +7,4 @@ ENV PYTHONUNBUFFERED 1
 
 COPY . .
 
-RUN pip install wheel
-
 RUN pip install -r requirements.txt

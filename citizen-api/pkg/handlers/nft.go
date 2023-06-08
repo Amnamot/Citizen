@@ -4,6 +4,10 @@ import (
 	"citizen-api/pkg/utils"
 	"context"
 	"encoding/json"
+	"math/big"
+	"net/http"
+	"os"
+	"strings"
 	"github.com/sirupsen/logrus"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/liteclient"
@@ -11,10 +15,6 @@ import (
 	"github.com/xssnick/tonutils-go/ton"
 	"github.com/xssnick/tonutils-go/ton/nft"
 	"github.com/xssnick/tonutils-go/ton/wallet"
-	"math/big"
-	"net/http"
-	"os"
-	"strings"
 )
 
 type Content struct {
@@ -23,13 +23,6 @@ type Content struct {
 	Image       string                   `json:"image"`
 	ContentUrl  string                   `json:"content_url"`
 	Attributes  []map[string]interface{} `json:"attributes"`
-	Vices map[string]interface{} `json:"vices"`
-	Characters map[string]interface{} `json:"characters"`
-	Moralities map[string]interface{} `json:"moralities"`
-	Skills map[string]interface{} `json:"skills"`
-	Emotions map[string]interface{} `json:"emotions"`
-	Attitudes map[string]interface{} `json:"attitudes"`
-	Ties map[string]interface{} `json:"ties"`
 }
 
 type NFTData struct {
@@ -61,7 +54,7 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := utils.UploadImg(data.Photo)
+	img_url, err := utils.UploadImg(data.Photo)
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +62,8 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Metadata.Attributes[4]["value"] = url
+
+	data.Metadata.Attributes[4]["value"] = img_url
 
 	content, err := json.Marshal(data.Metadata)
 	if err != nil {
@@ -78,7 +72,8 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": err})
 		return
 	}
-	url, err = utils.UploadContent(content)
+
+	url, err := utils.UploadContent(content)
 	if err != nil {
 		logrus.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -142,5 +137,5 @@ func DeployNFTItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddress.String(), "content": newData.Content, "owner": newData.OwnerAddress.String()})
+	json.NewEncoder(w).Encode(map[string]interface{}{"nft_address": nftAddress.String(), "content": newData.Content, "owner": newData.OwnerAddress.String(), "img": img_url})
 }

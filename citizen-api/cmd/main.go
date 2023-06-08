@@ -46,6 +46,8 @@ func main() {
 
 	router.HandleFunc("/warning", handlers.Warning).Methods("GET")
 
+	router.HandleFunc("/getProfile", handlers.GetProfile).Methods("GET")
+
 	router.HandleFunc("/validate", handlers.Validate).Methods("GET")
 	
 

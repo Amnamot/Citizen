@@ -97,17 +97,16 @@ async def submit(call: types.CallbackQuery, state: FSMContext):
                 async with session.post(f'{os.getenv("api_url")}/api/v1/deployNFT', json={"photo": base64_encoded, "id": call.message.chat.id, "address": wallet[3].address.to_string(True, True, True), "content": metadata, "key": key}) as resp:
                     response = await resp.read()
 
-
                 if resp.status == 200:
+                    data = json.loads(response.decode())
+                    metadata["attributes"][4]["value"] = data["img"]
                     async with db_session() as session:
                         user: User = await session.get(User, call.message.chat.id)
-                        user.content = json.dumps(metadata, indent = 4)
+                        user.content = json.dumps(metadata)
                         user.ispassport = True
                         await session.commit()
-                    data = json.loads(response.decode())
                     await call.message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("GO", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={call.message.chat.id}'))))
                 else:
-                    print(response.decode())
                     await state.set_state(FormStates.waiting_click_form)
                     await call.message.answer("Failed to mint passport try again")
                     await call.message.answer(form_text.format(data["first_name"] if "first_name" in data else "🚫", data["last_name"] if "last_name" in data else "🚫", data["gender"] if "gender" in data else "🚫", data["date_of_birth"] if "date_of_birth" in data else "🚫", "🖼" if "photo" in data else "🚫"), reply_markup=form_keyboard(), parse_mode="Markdown")
