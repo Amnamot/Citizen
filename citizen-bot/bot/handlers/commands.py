@@ -31,10 +31,10 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 async def my_passport(message: types.Message):
-    await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
+    await message.answer("We passport", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}&username={message.chat.username}'))))
 
 async def social(message: types.Message):
-    await message.answer("If you know this user, you can confirm this social connection by going to your passport or ignore", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}'))))
+    await message.answer("If you know this user, you can confirm this social connection by going to your passport or ignore", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Open passport", web_app=WebAppInfo(url=f'{os.getenv("api_url")}?id={message.chat.id}&username={message.chat.username}'))))
 
 
 

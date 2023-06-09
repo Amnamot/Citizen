@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<title>Citizen</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="static/css/style.min.css">
+	<link rel="shortcut icon" href="static/img/favico.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+	<style>
+		.autoCompliteList {z-index: 101; width: 100px};
+	</style>
+</head>
+
+<body>
+	<div class="site">
+		<div id="__page__index" class="wrapper">
+			<header class="header _container">
+				<div class="header__content">
+					<div class="header__osn">
+						{{$photo := index .attributes 4}}
+						<div class="header__img _popup-link" id="__User_img" href="#userImg">
+							<picture class="user_picture">
+								<source srcset="static/img/header/profile.svg" type="image/webp"><img
+									class="_popup-link user_image" src="static/img/header/profile.svg" alt="profile"
+									width="100%" height="100%" href="#userImg">
+							</picture>
+						</div>
+						<div class="header__info block__info">
+							<div class="header__field block__field">
+								<p class="text field__name">TG name</p>
+
+								<div class="input__text text field__value bold">:
+									<div class="inline" id="__User_tgName"></div>
+								</div>
+							</div>
+							<div class="header__field block__field">
+								{{$first_name := index .attributes 0}}
+								<p class="text field__name">Name</p>
+								<div class="input__text text field__value bold">: <div class="inline" id="__User_name">
+										{{ $first_name.value }}</div>
+								</div>
+							</div>
+
+							<div class="header__field block__field">
+								{{$last_name := index .attributes 1}}
+								<p class="text field__name">Surname</p>
+								<div class="input__text text field__value bold">: <div class="inline"
+										id="__User_surname">{{ $last_name.value }}</div>
+								</div>
+							</div>
+
+							<div class="header__field block__field">
+								{{$date_of_birth := index .attributes 3}}
+								<p class="text field__name">Birth</p>
+								<div class="input__text text field__value bold">: <div class="inline" id="__User_birth">
+										{{ $date_of_birth.value }}</div>
+								</div>
+							</div>
+
+							<div class="header__field block__field">
+								{{$gender := index .attributes 2}}
+								<p class="text field__name">Gender</p>
+								<div class="input__text text field__value bold">: <div class="inline"
+										id="__User_gender">{{ $gender.value }}</div>
+								</div>
+							</div>
+
+							<div class="block__fields">
+								<div class="block__field">
+									<p class="text field__name">Act. points</p>
+									<div class="input__text text field__value bold">:
+										<div class="inline" id="__User_points">{{ .points }}</div>
+									</div>
+								</div>
+								<div class="block__field">
+									<p class="text field__name">Thanks</p>
+									<div class="input__text text field__value bold">:
+										<div class="inline" id="__User_thanks"></div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<div class="header__dop">
+						<div class="header__dopInfo_auth">
+							<ul>
+								<li class="little_text">
+									{{$register := index .attributes 5}}
+									Registration: <p id="__User_dateReg" class="bold">{{ $register.value }}</p>
+								</li>
+								<li class="little_text">•</li>
+								<li class="little_text cursor__pointer" id='__User_tokenToScan'
+									onclick="window.location='https://tonscan.org/address/{{ .nft_address }}'">
+									Address: <p id="__User_token" class="bold">{{ .display_address }}</p>
+								</li>
+								<li class="little_text">•</li>
+								<li class="little_text cursor__pointer __page_open__walletInfo">
+									Balance: <p id="__User_balance" class="bold">0 TON</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</header>
+			<main class="page block__all_row">
+
+				<div id="page__content" class="_container">
+					<template id="tabListsTemplate__standard">
+						<li>
+							<div class="list__content">
+								<div class="field__value field__stat">
+									<div class="value">5</div>
+									<div>/</div>
+									<div class="value">250</div>
+									<div>/</div>
+									<div class="value">300</div>
+								</div>
+							</div>
+						</li>
+					</template>
+					<div id="Characters" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Characters —
+								<div id="tabList__Count">
+									{{ len .characters}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Characters__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .characters}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addCharacter"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div id="Emotions" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Emotions —
+								<div id="tabList__Count">
+									{{ len .emotions}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Emotions__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .emotions}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addEmotion"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div id="Morality" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Morality —
+								<div id="tabList__Count">
+									{{ len .moralities}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Morality__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .moralities}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addMorality"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div id="Vices" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Vices —
+								<div id="tabList__Count">
+									{{ len .vices}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Vices__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .vices}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addVice"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+
+					<div id="Attitude" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Attitude —
+								<div id="tabList__Count">
+									{{ len .attitudes}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Attitude__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .attitudes}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addAttitude"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div id="Skills" class="tabList">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Skills —
+								<div id="tabList__Count">
+									{{ len .skills}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="Skills__color"
+								href="#moreInfoForStat">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+								<ul class="list">
+									{{ range $key, $data := .skills}}
+									<li>
+										<div class="list__content">
+											{{ $key }}
+											<div class="field__value field__stat">
+												<div class="value">{{ index . 0}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 1}}</div>
+												<div>/</div>
+												<div class="value">{{ index . 2}}</div>
+											</div>
+										</div>
+									</li>
+									{{ end }}
+									<li id="User__seeAdmin">
+										<div class="button button__add button__line">
+											<div class="miniText addSkill"> Add entry</div>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div id="SocialTies" class="tabList User__seeAdmin">
+						<div class="tabList__info h1">
+							<div class="cursor__pointer">
+								Social ties —
+								<div id="tabList__Count">
+									{{ len .ties}}
+								</div>
+							</div>
+							<div class="button__moreInfoForStat _popup-link" popupcolor="SocialTies__color"
+								href="#SocialTies_info">(?)</div>
+						</div>
+						<div class="tabList__more hide">
+							<div class="field__list miniText">
+
+								{{ range $key, $data := .ties}}
+								<div class="user user__select">
+									<div class="user__block" onclick="if (this.nextElementSibling.classList.contains('hide')) {this.nextElementSibling.classList.remove('hide')} else {this.nextElementSibling.classList.add('hide')}">
+										<div class="user__name cursor__pointer">{{ $key }}</div>
+										<div class="user__value">{{ .role }} (0)</div>
+									</div>
+									<div class="user__action miniText hide">
+										<ul class="list">
+											<li class="Set__link cursor__pointer"
+												onclick="window.location = this.getAttribute('href')">View passport</li>
+											<li id="User__seeAdmin" class="_popup-link" popupcolor="SocialTies__color"
+												href="#Describe">Describe</li>
+											<li id="User__seeAdmin" class="_popup-link" popupcolor="SocialTies__color" onclick="blankProfile('{{ $key }}');document.querySelector('.popup_ChangeTheTies').classList.add('_active')";>Change the ties</li>
+											<li id="User__seeAdmin" class="_popup-link" popupcolor="SocialTies__color"
+												href="#Thank">Say Thank You</li>
+										</ul>
+									</div>
+								</div>
+								{{ end }}
+
+								<div id="User__seeAdmin" class="button button__add button__line">
+									<div class="miniText addTie"> Add entry</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</main>
+		</div>
+
+		<div id="__page__walletInfo" class="hide wrapper">
+			<header class="add__header title">Wallet</header>
+			<div class="_container">
+				<div class="text"> This is your custodial wallet. It can be used to accumulate TONs sent to you by
+					citizens as a thank you, as well as to thank other citizens from your social ties. </div> <br />
+				<div class="text hideBalanceNotNull"> Right now your wallet is empty. You can top up your balance in
+					various ways. Here is the wallet address for recharging: </div>
+				<div class="text hideBalanceNull hide"> You now have <p id="__User_balance"
+						style="display: inline-block"></p> in your wallet. If this is not enough, you can top up in
+					various ways. Here is the wallet address for recharging: </div>
+				<div class="button_wallet_copy cursor__pointer copy__value" id="__User_tokenCopy" copy="none">
+					<div class="miniText">COPY</div>
+					<div class="value text bold  "> none </div>
+				</div>
+				<div class="text hideBalanceNull hide"> You can thank someone in your social ties by clicking on their
+					name in the social networks box and selecting "Say Thank You". </div>
+				<div class="walletInfo__footer standartText">
+					<div>
+						<div class="button button__white title" onclick="history.back()"> OK </div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="popup popup_Moral_help popup_moreInfoForStat">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data">
+					<div class="text">All indicators are<br> backed up by real<br> people from your social <br> ties.
+					</div>
+					<div class="text">***</div>
+					<div>
+						<div class="text">
+							<div class="color__green">X%</div> — Yes
+						</div>
+						<div class="text">
+							<div class="color__red">Y%</div> — No
+						</div>
+						<div class="text">
+							<div class="color__grey">Z%</div> — Ignore
+						</div>
+					</div>
+					<div class="text">Due to the fact that <br> someone could not vote,<br> the total number<br> is not
+						100%</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_Describe">
+		<div class="popup__content">
+			<div class="popup__body h1">
+				<div class="popup__data">
+					<div class="popup__head">
+						<div class="h1">Add entry for</div>
+						<div class="h1 bold __UserName">@Telegram name></div>
+					</div>
+
+					<div class="Describe__photo">
+						<picture>
+							<source srcset="static/img/header/profile.svg" type="image/webp"><img class=""
+								src="static/img/header/profile.svg" alt="userPhoto" width="100%">
+						</picture>
+					</div>
+
+					<div class="Describe__Characters_add">
+						<p class="h1">Character</p>
+						<div class="Describe__block_add Characters__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addCharacters   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+							<div class="Characters__list">
+								<template id="popup_DescribeTemplate">
+									<div class="list__inline">
+										<p class="h1 bold">
+											Moderate
+										</p>
+										<div class="field__line"></div>
+										<div class="field__value field__stat h1">
+											<div class="value">5</div>
+											<div>/</div>
+											<div class="value">250</div>
+											<div>/</div>
+											<div class="value">300</div>
+										</div>
+									</div>
+								</template>
+
+							</div>
+						</div>
+					</div>
+					<div class=" Describe__Attitude_add">
+						<p class="h1">Attitude</p>
+						<div class="Describe__block_add Attitude__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addAttitude   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+
+							<div class="Attitude__list">
+
+
+							</div>
+
+						</div>
+					</div>
+
+					<div class=" Describe__Morality_add">
+						<p class="h1">Morality</p>
+						<div class="Describe__block_add Morality__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addMorality   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+
+							<div class="Morality__list">
+
+							</div>
+
+						</div>
+
+					</div>
+
+					<div class=" Describe__Vices_add">
+						<p class="h1">Vices</p>
+						<div class="Describe__block_add Vices__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addVices   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+
+							<div class="Vices__list">
+
+							</div>
+
+						</div>
+
+					</div>
+
+					<div class=" Describe__Emotions_add">
+						<p class="h1">Emotions</p>
+						<div class="Describe__block_add Emotions__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addEmotions   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+
+							<div class="Emotions__list">
+
+
+							</div>
+
+						</div>
+					</div>
+
+					<div class=" Describe__Skills_add">
+						<p class="h1">Skills</p>
+						<div class="Describe__block_add Skills__color">
+							<div id="User__seeAdmin" class="button button__add __page_open__addSkills   ">
+								<picture>
+									<source srcset="static/img/help/add.svg" type="image/webp"><img
+										src="static/img/help/add.svg" alt="add" height="100%">
+								</picture>
+								<div> Add</div>
+							</div>
+
+							<div class="Skills__list">
+
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_SocialTies_info">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data">
+					<div class="text">
+						This is where social <br> connections are made and <br> found - individuals you have <br> ever
+						interacted with. You need them <br> to assign characteristics to them and <br> have them confirm
+						or deny <br> your characteristics.
+					</div>
+					<div class="text">
+						The number of reactions to <br> offers of characteristics <br> from other citizens is given <br>
+						in brackets.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_ChangeTheTies">
+		<div class="popup__content">
+			<div class="popup__body">
+				<form class="popup__data" action="/changeTie" method="post">
+					<div class="popup__head">
+						<div class="h1">Change the ties:</div>
+						<div class="h1 bold __User_Name Change_Ties_username">@Telegram name></div>
+					</div>
+
+					<div class="ChangeTheTies__photo">
+						<picture>
+							<source srcset="static/img/header/profile.svg" type="image/webp"><img class=""
+								src="static/img/header/profile.svg" alt="userPhoto" width="100%">
+						</picture>
+					</div>
+					<div class="ChangeTheTies__add">
+						<p class="h1">Social role:</p>
+						<select id="combobox" class="form__Ties standartText">
+							<option value=""></option>
+							{{ range .role}}
+							<option value="{{.}}">{{.}}</option>
+							{{ end }}
+						</select>
+					</div>
+					<input type="text" name="" id="">
+					<div class="form__footer h1 bold">
+						<div class="button button__white">Change</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_Thank">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data h1">
+					<div class="popup__head">
+						<div>You are going to say </div>
+						<div class="bold">THANK YOU </div>
+						<div>to a citizen </div>
+						<div class="bold __User_Name">@Telegram name></div>
+					</div>
+
+					<div class="Thank__photo">
+						<picture>
+							<source srcset="static/img/header/profile.svg" type="image/webp"><img class=""
+								src="static/img/header/profile.svg" alt="userPhoto" width="100%">
+						</picture>
+					</div>
+
+					<div class="Thank__info">
+						In what amount of TON
+						will your gratitude
+						be expressed?
+					</div>
+
+					<div class="Thank__Ton">
+						<div class="button__Token">
+							<input class="h1" type="number" value="0.00" min="0.01">
+
+						</div>
+
+						<div class="Ton__img">
+							<p>TON</p>
+						</div>
+
+					</div>
+
+
+					<div class="form__footer h1 bold">
+						<div class="button button__grey">Send</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_ThankNo">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data h1">
+					<p>There are not enough funds on your balance. Copy the address of your custodial wallet for
+						replenishment.</p>
+					<div class="data__info copy__value">
+						Copy the address
+						of your custodial wallet
+						for replenishment
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="popup popup_userImg">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data">
+					<div id="__User_img">
+						<picture class="user_picture">
+							<source srcset="static/img/header/profile.svg" type="image/webp"><img
+								src="static/img/header/profile.svg" alt="user_img" width="100%">
+						</picture>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup popup_UserAlertNotFound">
+		<div class="popup__content">
+			<div class="popup__body">
+				<div class="popup__data">
+					<div class="text">
+						This citizen does not yet have a passport.
+					</div>
+					<div class="text">
+						First you need to ask him to get this passport.
+					</div>
+					<div class="button button__white text copy__value" onclick="history.back()"
+						copy="https://t.me/citizen_pasport_bot">
+						Copy the address of the bot to the clipboard.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="static/js/vendors.min.js"></script>
+	<script src="static/js/app.min.js"></script>
+	<script src="https://telegram.org/js/telegram-web-app.js"></script>
+	<script>
+		let xhr = new XMLHttpRequest();
+		const getImg = fetch("{{ $photo.value }}")
+			.then((response) => {
+				return response.text()
+			});
+
+		getImg.then((img) => {
+			const pictures = document.querySelectorAll(".user_picture source")
+			pictures[0].srcset = img
+			pictures[1].srcset = img
+			document.querySelector(".user_image").src = img
+		})
+
+		const baseUrl = "http://127.0.0.1:8000" //https://citizen.cool
+		const urlParams = new URLSearchParams(window.location.search);
+		const username = urlParams.get('username');
+		const id = urlParams.get('id');
+		const tg_name = document.querySelector("#__User_tgName")
+		tg_name.innerHTML = username
+
+
+
+		// var WebApp = window.Telegram.WebApp;
+		// let validateUrl = new URL(baseUrl + '/validate');
+		// validateUrl.searchParams.set('initData', WebApp.initData);
+
+		// xhr.open('GET', validateUrl);
+		// xhr.responseType = 'json'; 
+		// xhr.setRequestHeader("Content-Type", "application/json"); 
+		// xhr.send();
+		// xhr.onload = function() {
+		//     if (xhr.status == 200){
+		//       if (xhr.response.result == false){
+		//         window.location.href = baseUrl + "/warning"
+		//       }
+		//     }
+		// }
+
+		const addEmotion = document.querySelector(".addEmotion")
+		addEmotion.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addemotion?id=" + id
+		})
+
+		const addCharacter = document.querySelector(".addCharacter")
+		addCharacter.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addcharacter?id=" + id
+		})
+
+		const addMorality = document.querySelector(".addMorality")
+		addMorality.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addmorality?id=" + id
+		})
+
+		const addAttitude = document.querySelector(".addAttitude")
+		addAttitude.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addattitude?id=" + id
+		})
+
+		const addSkill = document.querySelector(".addSkill")
+		addSkill.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addskill?id=" + id
+		})
+
+		const addVice = document.querySelector(".addVice")
+		addVice.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addvice?id=" + id
+		})
+
+		const addTie = document.querySelector(".addTie")
+		addTie.addEventListener("click", function () {
+			window.location.href = baseUrl + "/addsocialtie?id=" + id
+		})
+
+		function blankProfile(username){
+			document.querySelector(".Change_Ties_username").textContent = username
+			let getProfileUrl = new URL(baseUrl + '/getProfile');
+			getProfileUrl.searchParams.set('username', username);
+			xhr.open('GET', getProfileUrl);
+			xhr.responseType = 'json'; 
+			xhr.setRequestHeader("Content-Type", "application/json"); 
+			xhr.send();
+			xhr.onload = function() {
+			    if (xhr.status == 200){
+					console.log(xhr.response.result["attributes"][4]["value"])
+				  	const getImg = fetch(xhr.response.result["attributes"][4]["value"])
+						.then((response) => {
+							return response.text()
+						});
+
+					getImg.then((img) => {
+						const pictures = document.querySelectorAll(".ChangeTheTies__photo source")
+						pictures[0].srcset = img
+						pictures[1].srcset = img
+						document.querySelector(".user_image").src = img
+					})
+			    }
+			}
+		}
+	</script>
+</body>
+
+</html>
