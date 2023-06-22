@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	base_url = "http://127.0.0.1:8000"
+	base_url = "https://citizen.cool"
 )
 
 // var questionKeyboard = tgbotapi.NewInlineKeyboardMarkup(
@@ -315,6 +315,37 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	data["points"] = points
 
 	data["role"] = c["role"]
+
+	data["addVices"] = c["vices"]
+
+	data["addMoralities"] = c["moralities"]
+
+	data["addEmotions"] = c["emotions"]
+
+	data["addCharacters"] = c["characters"]
+
+	data["addAttitudes"] = c["attitudes"]
+
+	var usernames []string
+
+	rows, err = dbpool.Query(context.Background(), "SELECT username FROM users WHERE ispassport=TRUE")
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
+
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			logrus.Println(err.Error())
+		}
+		usernames = append(usernames, username)
+	}
+
+	data["usernames"] = usernames
+
 
 	err = ts.Execute(w, data)
 	if err != nil {

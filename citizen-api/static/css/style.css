@@ -1754,23 +1754,33 @@ form.add__form .form__footer > div div:last-child {
 
 @media (max-width: 856px) {
   .button__add img {
-    height: calc( 10px + 20 * ((100vw - 320px) / 536));
+    height: calc(
+ 10px + 20 *
+ ((100vw - 320px) / 536));
   }
 
   .button__add img {
-    margin-right: calc( 3px + 7 * ((100vw - 320px) / 536));
+    margin-right: calc(
+ 3px + 7 *
+ ((100vw - 320px) / 536));
   }
 
   .button__add.button__line > div {
-    border-bottom-width: calc( 1px + 1 * ((100vw - 320px) / 536));
+    border-bottom-width: calc(
+ 1px + 1 *
+ ((100vw - 320px) / 536));
   }
 
   .popup_Describe .Describe__block_add picture img {
-    height: calc( 15px + 15 * ((100vw - 320px) / 536));
+    height: calc(
+ 15px + 15 *
+ ((100vw - 320px) / 536));
   }
 
   .Moral .Moral__help img {
-    height: calc( 10px + 20 * ((100vw - 320px) / 536));
+    height: calc(
+ 10px + 20 *
+ ((100vw - 320px) / 536));
   }
 }
 
@@ -1924,81 +1934,118 @@ form.add__form .form__footer > div div:last-child {
 
 @media (max-width: 320px) {
   .title {
-    font-size: calc( 25px + 5 * ((320px - 320px) / 536));
+    font-size: calc(
+ 25px + 5 *
+ ((320px - 320px) / 536));
   }
 
   .text {
-    font-size: calc( 10px + 20 * ((320px - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((320px - 320px) / 536));
   }
 
   .h1 {
-    font-size: calc( 17px + 18 * ((320px - 320px) / 536));
+    font-size: calc(
+ 17px + 18 *
+ ((320px - 320px) / 536));
   }
 
   .bigText {
-    font-size: calc( 40px + 30 * ((320px - 320px) / 536));
+    font-size: calc(
+ 40px + 30 *
+ ((320px - 320px) / 536));
   }
 
   .miniText {
-    font-size: calc( 12px + 8 * ((320px - 320px) / 536));
+    font-size: calc(
+ 12px + 8 *
+ ((320px - 320px) / 536));
   }
 
   .little_text {
-    font-size: calc( 9px + 11 * ((320px - 320px) / 536));
+    font-size: calc(
+ 9px + 11 *
+ ((320px - 320px) / 536));
   }
 
   .standartText {
-    font-size: calc( 13px + 12 * ((320px - 320px) / 536));
+    font-size: calc(
+ 13px + 12 *
+ ((320px - 320px) / 536));
   }
 
   .block__info .block__field .field__name,
   .block__info .block__field .field__value {
-    font-size: calc( 10px + 20 * ((320px - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((320px - 320px) / 536));
   }
 
   .block__info .block__fields .field__name,
   .block__info .block__fields .field__value {
-    font-size: calc( 10px + 20 * ((320px - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((320px - 320px) / 536));
   }
 }
 
+
 @media (max-width: 856px) and (min-width: 320px) {
   .title {
-    font-size: calc( 25px + 5 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 25px + 5 *
+ ((100vw - 320px) / 536));
   }
 
   .text {
-    font-size: calc( 10px + 20 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((100vw - 320px) / 536));
   }
 
   .h1 {
-    font-size: calc( 17px + 18 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 17px + 18 *
+ ((100vw - 320px) / 536));
   }
 
   .bigText {
-    font-size: calc( 40px + 30 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 40px + 30 *
+ ((100vw - 320px) / 536));
   }
 
   .miniText {
-    font-size: calc( 12px + 8 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 12px + 8 *
+ ((100vw - 320px) / 536));
   }
 
   .little_text {
-    font-size: calc( 9px + 11 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 9px + 11 *
+ ((100vw - 320px) / 536));
   }
 
   .standartText {
-    font-size: calc( 13px + 12 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 13px + 12 *
+ ((100vw - 320px) / 536));
   }
 
   .block__info .block__field .field__name,
   .block__info .block__field .field__value {
-    font-size: calc( 10px + 20 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((100vw - 320px) / 536));
   }
 
   .block__info .block__fields .field__name,
   .block__info .block__fields .field__value {
-    font-size: calc( 10px + 20 * ((100vw - 320px) / 536));
+    font-size: calc(
+ 10px + 20 *
+ ((100vw - 320px) / 536));
   }
 }
 

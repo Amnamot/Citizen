@@ -28,19 +28,19 @@ func main() {
 
 	router.HandleFunc("/", handlers.Index).Methods("GET")
 
-	router.HandleFunc("/addvice", handlers.Vices).Methods("GET", "POST")
+	router.HandleFunc("/addvice", handlers.Vices).Methods("POST")
 
-	router.HandleFunc("/addsocialtie", handlers.SocialTies).Methods("GET", "POST")
+	router.HandleFunc("/addsocialtie", handlers.SocialTies).Methods("POST")
 
-	router.HandleFunc("/addskill", handlers.Skills).Methods("GET", "POST")
+	router.HandleFunc("/addskill", handlers.Skills).Methods("POST")
 
-	router.HandleFunc("/addmorality", handlers.Morality).Methods("GET", "POST")
+	router.HandleFunc("/addmorality", handlers.Morality).Methods("POST")
 
-	router.HandleFunc("/addemotion", handlers.Emotions).Methods("GET", "POST")
+	router.HandleFunc("/addemotion", handlers.Emotions).Methods("POST")
 
-	router.HandleFunc("/addcharacter", handlers.Characters).Methods("GET", "POST")
+	router.HandleFunc("/addcharacter", handlers.Characters).Methods("POST")
 
-	router.HandleFunc("/addattitude", handlers.Attitude).Methods("GET", "POST")
+	router.HandleFunc("/addattitude", handlers.Attitude).Methods("POST")
 
 	router.HandleFunc("/faq", handlers.FAQ).Methods("GET")
 

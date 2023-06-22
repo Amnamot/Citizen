@@ -16,7 +16,7 @@
 </head>
 
 <body>
-	<div class="site">
+	<div class="site main">
 		<div id="__page__index" class="wrapper">
 			<header class="header _container">
 				<div class="header__content">
@@ -95,7 +95,7 @@
 								</li>
 								<li class="little_text">•</li>
 								<li class="little_text cursor__pointer" id='__User_tokenToScan'
-									onclick="window.location='https://tonscan.org/address/{{ .nft_address }}'">
+									onclick="">
 									Address: <p id="__User_token" class="bold">{{ .display_address }}</p>
 								</li>
 								<li class="little_text">•</li>
@@ -153,7 +153,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addCharacter"> Add entry</div>
+											<div onclick="document.querySelector('.site.characters').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addCharacter"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -191,7 +191,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addEmotion"> Add entry</div>
+											<div onclick="document.querySelector('.site.emotions').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addEmotion"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -229,7 +229,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addMorality"> Add entry</div>
+											<div onclick="document.querySelector('.site.moralities').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addMorality"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -267,7 +267,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addVice"> Add entry</div>
+											<div onclick="document.querySelector('.site.vices').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addVice"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -306,7 +306,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addAttitude"> Add entry</div>
+											<div onclick="document.querySelector('.site.attitudes').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addAttitude"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -344,7 +344,7 @@
 									{{ end }}
 									<li id="User__seeAdmin">
 										<div class="button button__add button__line">
-											<div class="miniText addSkill"> Add entry</div>
+											<div onclick="document.querySelector('.site.skills').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addSkill"> Add entry</div>
 										</div>
 									</li>
 								</ul>
@@ -387,7 +387,7 @@
 								{{ end }}
 
 								<div id="User__seeAdmin" class="button button__add button__line">
-									<div class="miniText addTie"> Add entry</div>
+									<div onclick="document.querySelector('.site.ties').style.display = 'block'; document.querySelector('.site.main').style.display = 'none';" class="miniText addTie"> Add entry</div>
 								</div>
 							</div>
 						</div>
@@ -740,82 +740,548 @@
 		</div>
 	</div>
 
+	<div class="site vices" style="display: none;">
+		<div id="params_form" class="wrapper Vices__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add Vices</div>
+			<div class="button_info text cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_vice')[0].style.display = 'block'; document.querySelector('.site.vices').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addvice">
+			  <div class="form__block standartText">
+				Add property:
+				<select id="combobox" class="form__property standartText" name="vice_1" required>
+				  <option value=""></option>
+				  {{ range .addVices}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<select id="combobox" class="form__more standartText" name="vice_2">
+				  <option value=""></option>
+				  {{ range .addVices}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.vices').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+	
+	  <div class="site ties" style="display: none;">
+		<div id="params_form" class="wrapper SocialTies__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add social ties</div>
+			<div class="button_info text cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_tie')[0].style.display = 'block'; document.querySelector('.site.ties').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addsocialtie">
+			  <div class="form__block standartText">
+				Telegram username:
+				<select id="combobox" class="form__socialRole standartText" name="username">
+				  <option value=""></option>
+				  {{ range .usernames}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Social role:
+				<select id="combobox" class="form__socialRole standartText" name="role">
+				  <option value=""></option>
+				  {{ range .role}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.ties').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div class="site skills" style="display: none;">
+		<div id="params_form" class="wrapper Skills__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Skills</div>
+			<div class="button_info text cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_skill')[0].style.display = 'block'; document.querySelector('.site.skills').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addskill">
+			  <div class="form__block standartText">
+				Add property:
+				<input type="text" class="form__property standartText" name="skill_1" />
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<input type="text" class="form__property standartText" name="skill_2" />
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.skills').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div class="site moralities" style="display: none;">
+		<div id="params_form" class="wrapper Morality__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add Morality</div>
+			<div class="button_info text cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_morality')[0].style.display = 'block'; document.querySelector('.site.moralities').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addmorality">
+			  <div class="form__block standartText">
+				Add property:
+				<select id="combobox" class="form__property standartText" name="morality_1">
+				  <option value=""></option>
+				  {{ range .addMoralities}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<select id="combobox" class="form__more standartText" name="morality_2">
+				  <option value=""></option>
+				  {{ range .addMoralities}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.moralities').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div class="site emotions" style="display: none;">
+		<div id="params_form" class="wrapper Emotions__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add Emotions</div>
+			<div class="button_info text  cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_emotion')[0].style.display = 'block'; document.querySelector('.site.emotions').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addemotion">
+			  <div class="form__block standartText">
+				Add property:
+				<select id="combobox" class="form__property standartText" name="emotion_1">
+				  <option value=""></option>
+				  {{ range .addEmotions}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<select id="combobox" class="form__more standartText" name="emotion_2">
+				  <option value=""></option>
+				  {{ range .addEmotions}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.emotions').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div class="site characters" style="display: none;">
+		<div id="params_form" class="wrapper Characters__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add Character</div>
+			<div class="button_info text __page_open__addCharactersInfo cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_character')[0].style.display = 'block'; document.querySelector('.site.characters').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addcharacter">
+			  <div class="form__block standartText">
+				Add property:
+				<select id="combobox" class="form__property standartText" name="character_1">
+				  <option value=""></option>
+				  {{ range .addCharacters}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<select id="combobox" class="form__more standartText" name="character_2">
+				  <option value=""></option>
+				  {{ range .addCharacters}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.characters').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div class="site attitudes" style="display: none;">
+		<div id="params_form" class="wrapper Attitude__color">
+		  <header class="add__header title">
+			<div class="add__header_tittle">Add Attitude</div>
+			<div class="button_info text  cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_attitude')[0].style.display = 'block'; document.querySelector('.site.attitudes').style.display = 'none';">!!!</div>
+		  </header>
+		  <main class="page add_page">
+			<form class="add__form _container" method="post" action="/addattitude">
+			  <div class="form__block standartText">
+				Add property:
+				<select id="combobox" class="form__property standartText" name="attitude_1">
+				  <option value=""></option>
+				  {{ range .addAttitudes}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <div class="form__block standartText">
+				Add more:
+				<select id="combobox" class="form__more standartText" name="attitude_2">
+				  <option value=""></option>
+				  {{ range .addAttitudes}}
+				  <option value="{{.}}">{{.}}</option>
+				  {{ end }}
+				</select>
+			  </div>
+			  <input type="text" name="initData" hidden>
+			  <div class="form__footer standartText">
+				<div>
+				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.attitudes').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
+					Cancel
+				  </button>
+				</div>
+			  </div>
+			</form>
+		  </main>
+		  <footer class="footer">
+		  </footer>
+		</div>
+	  </div>
+
+	  <div id="params_info vice" class="wrapper Vices__color info_vice" style="display: none;">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  <p class="bold" style="display: inline-block">Views</p>
+			  are a moral, spiritual lack of character of a person, the negative moral
+			  quality of a person expressed in his emotional qualities and actions.
+			  Views often turn into negative habits.
+			</div>
+			<br />
+			<div class="text">
+			  Treat responsibly, unbiased and as impartial as possible to add or
+			  change the parameter! Be honest!
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.querySelector('.info_vice').style.display = 'none'; document.querySelector('.site.vices').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+	  <div id="params_info tie" class="wrapper SocialTies__color info_tie" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  <p class="bold" style="display: inline-block">Social ties</p>
+			  are relations and interactions between people based on various social
+			  factors, such as marital status, friendship, work, communication on
+			  social networks, etc. These connections can be both formal and informal
+			  and include interactions between people, including the exchange of
+			  information, opinions, emotions and other resources.
+			</div>
+			<br />
+			<div class="text">
+			  Social relations can have a significant impact on a person’s life and
+			  influence his behavior, thinking, feelings and emotions.
+			</div>
+			<br />
+			<div class="text">
+			  When adding a new connection, try to cover as a common circle of dating
+			  as possible - this will favorably affect the impartial assessment of
+			  your personality!
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_tie')[0].style.display = 'none'; document.querySelector('.site.ties').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+	  <div id="params_info skill" class="wrapper Skills__color info_skill" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  This section assigns <p class="bold" style="display: inline-block">skills</p>
+			  and competencies that allow a person to effectively perform various tasks and achieve their goals. Skills
+			  can be either general or specialized, and can relate to different areas such as communication, leadership,
+			  creative thinking, time management, and many others.
+			</div>
+			<br />
+			<div class="text">
+			  For example, generic skills may be communication, leadership, presentation, and time management skills that
+			  are important to work in any field of endeavor. Specialized skills may relate to a specific profession or
+			  field, such as programming, design, marketing, etc.
+			</div>
+			<br />
+			<div class="text">
+			  Skill development is an important element of personal and professional development, and can occur through
+			  formal education and training as well as through self-study and practice. A combination of general and
+			  specialized skills can help a person do their job effectively, achieve their goals, and improve their skill
+			  level.
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_skill')[0].style.display = 'none'; document.querySelector('.site.skills').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+	  <div id="params_info morality" class="wrapper Morality__color info_morality" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  <p class="bold" style="display: inline-block">Morality</p>
+			  is a certain system of rules built at the intersection of a person’s own
+			  system, over systems (for example, parents, government), subsystems and
+			  other systems nearby (society)
+			</div>
+			<br />
+			<div class="text">
+			  Treat responsibly, unbiased and as impartial as possible to add or
+			  change the parameter! Be honest!
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_morality')[0].style.display = 'none'; document.querySelector('.site.moralities').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+	  <div id="params_info emotion" class="wrapper Emotions__color info_emotion" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  <p class="bold" style="display: inline-block">Emotions</p>
+			  determine the mental appearance of a person - form an emotional type of
+			  personality. Emotional qualities form the ability to manifest a person
+			  in the external environment and inside themselves (their personality),
+			  and also help or interfere in making a decision and contact with other
+			  living beings.
+			</div>
+			<br />
+			<div class="text">
+			  Treat responsibly, unbiased and as impartial as possible to add or
+			  change the parameter! Be honest!
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_emotion')[0].style.display = 'none'; document.querySelector('.site.emotions').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+	  <div id="params_info character" class="wrapper Characters__color info_character" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  <p class="bold" style="display: inline-block">Character</p>
+			  is a stable and individual set of qualities that determines how a person
+			  interacts with the world around him or her, his or her preferences,
+			  inclinations, motivations, behavioral and emotional reactions.
+			</div>
+			<br />
+			<div class="text">
+			  Some of the qualities may be more pronounced than others and may
+			  manifest differently depending on the situation and context. In
+			  addition, character can develop and change over the course of life as a
+			  result of experience, learning, and interaction with the world around
+			  us.
+			</div>
+			<br />
+			<div class="text">
+			  Character traits subconsciously influence one decision or another,
+			  without much consciousness. And only the subsequent evaluation of the
+			  consequences of the action and conclusions, lead to changes in the
+			  character and behavior of the person - so there is personal growth.
+			</div>
+			<br />
+			<div class="text">
+			  Treat responsibly, unbiased and as impartially as possible when adding
+			  or changing a parameter! Be honest!
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_character')[0].style.display = 'none'; document.querySelector('.site.characters').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
+
+	  <div id="params_info attitude" class="wrapper Attitude__color info_attitude" style="display: none">
+		<main class="page add_page">
+		  <div class="_container">
+			<div class="text">
+			  The mood is the general condition of the individual or group of
+			  individuals in relation to people around them, processes and internal
+			  states. In other words, the mood is a mood, as a combination of
+			  emotional factors, the nature and values ​​of a person.
+			</div>
+  
+			<div class="form__footer standartText">
+			  <div>
+				<div id="form_open" class="button button__white title" onclick="document.getElementsByClassName('info_attitude')[0].style.display = 'none'; document.querySelector('.site.attitudes').style.display = 'block';">
+				  OK
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</main>
+	  </div>
+
 	<script src="static/js/vendors.min.js"></script>
 	<script src="static/js/app.min.js"></script>
 	<script src="https://telegram.org/js/telegram-web-app.js"></script>
 	<script>
+		var WebApp = window.Telegram.WebApp;
 		let xhr = new XMLHttpRequest();
-		const getImg = fetch("{{ $photo.value }}")
-			.then((response) => {
-				return response.text()
-			});
-
-		getImg.then((img) => {
-			const pictures = document.querySelectorAll(".user_picture source")
-			pictures[0].srcset = img
-			pictures[1].srcset = img
-			document.querySelector(".user_image").src = img
-		})
 
 		const baseUrl = "https://citizen.cool" //https://citizen.cool
-		const urlParams = new URLSearchParams(window.location.search);
-		const username = urlParams.get('username');
-		const id = urlParams.get('id');
-		const tg_name = document.querySelector("#__User_tgName")
-		tg_name.innerHTML = username
 
 
+		let validateUrl = new URL(baseUrl + '/validate');
+		validateUrl.searchParams.set('initData', WebApp.initData);
 
-		// var WebApp = window.Telegram.WebApp;
-		// let validateUrl = new URL(baseUrl + '/validate');
-		// validateUrl.searchParams.set('initData', WebApp.initData);
+		xhr.open('GET', validateUrl);
+		xhr.responseType = 'json'; 
+		xhr.setRequestHeader("Content-Type", "application/json"); 
+		xhr.send();
+		xhr.onload = function() {
+		    if (xhr.status == 200){
+		      if (xhr.response.result == false){
+		        window.location.href = baseUrl + "/warning"
+		      } else {
+				const getImg = fetch("{{ $photo.value }}")
+					.then((response) => {
+						return response.text()
+					});
 
-		// xhr.open('GET', validateUrl);
-		// xhr.responseType = 'json'; 
-		// xhr.setRequestHeader("Content-Type", "application/json"); 
-		// xhr.send();
-		// xhr.onload = function() {
-		//     if (xhr.status == 200){
-		//       if (xhr.response.result == false){
-		//         window.location.href = baseUrl + "/warning"
-		//       }
-		//     }
-		// }
+				getImg.then((img) => {
+					const pictures = document.querySelectorAll(".user_picture source")
+					pictures[0].srcset = img
+					pictures[1].srcset = img
+					document.querySelector(".user_image").src = img
+				})
+				const urlParams = new URLSearchParams(window.location.search);
+				const username = urlParams.get('username');
+				const id = urlParams.get('id');
+				const tg_name = document.querySelector("#__User_tgName")
+				tg_name.innerHTML = username
 
-		const addEmotion = document.querySelector(".addEmotion")
-		addEmotion.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addemotion?id=" + id
-		})
+				const initDataInputs = document.querySelectorAll("input[name='initData']")
 
-		const addCharacter = document.querySelector(".addCharacter")
-		addCharacter.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addcharacter?id=" + id
-		})
-
-		const addMorality = document.querySelector(".addMorality")
-		addMorality.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addmorality?id=" + id
-		})
-
-		const addAttitude = document.querySelector(".addAttitude")
-		addAttitude.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addattitude?id=" + id
-		})
-
-		const addSkill = document.querySelector(".addSkill")
-		addSkill.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addskill?id=" + id
-		})
-
-		const addVice = document.querySelector(".addVice")
-		addVice.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addvice?id=" + id
-		})
-
-		const addTie = document.querySelector(".addTie")
-		addTie.addEventListener("click", function () {
-			window.location.href = baseUrl + "/addsocialtie?id=" + id
-		})
+				for (let data of initDataInputs){
+					data.value = WebApp.initData
+				}
+			  }
+		    }
+		}
 
 		function blankProfile(username){
 			document.querySelector(".Change_Ties_username").textContent = username
