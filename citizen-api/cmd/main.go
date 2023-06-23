@@ -49,6 +49,8 @@ func main() {
 	router.HandleFunc("/getProfile", handlers.GetProfile).Methods("GET")
 
 	router.HandleFunc("/validate", handlers.Validate).Methods("GET")
+
+	router.HandleFunc("/get-userpic", handlers.GetUserPic).Methods("GET")
 	
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))

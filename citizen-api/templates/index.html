@@ -370,7 +370,7 @@
 								<div class="user user__select">
 									<div class="user__block" onclick="if (this.nextElementSibling.classList.contains('hide')) {this.nextElementSibling.classList.remove('hide')} else {this.nextElementSibling.classList.add('hide')}">
 										<div class="user__name cursor__pointer">{{ $key }}</div>
-										<div class="user__value">{{ .role }} (0)</div>
+										<div class="user__value">{{ $data }} (0)</div>
 									</div>
 									<div class="user__action miniText hide">
 										<ul class="list">
@@ -634,7 +634,7 @@
 							{{ end }}
 						</select>
 					</div>
-					<input type="text" name="" id="">
+					<input type="text" name="initData" hidden>
 					<div class="form__footer h1 bold">
 						<div class="button button__white">Change</div>
 					</div>

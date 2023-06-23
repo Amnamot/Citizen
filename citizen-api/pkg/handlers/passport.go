@@ -442,7 +442,17 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{"result": data})
 
 
-
-
 }
 
+func GetUserPic(w http.ResponseWriter, r *http.Request) {
+	_, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
+
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"result": "AgACAgIAAxkDAAIQT2SVfImQBxn4kT2YH5HCcAsJki0XAAKspzEbmfZHOj8hiIEHb1YFAQADAgADYQADLwQ"})
+}

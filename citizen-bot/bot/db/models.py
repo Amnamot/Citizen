@@ -1,7 +1,8 @@
 from .base import BaseModel
-from sqlalchemy import Column, Integer, VARCHAR, Boolean, Table, Text, ForeignKey
+from sqlalchemy import Column, Integer, VARCHAR, Boolean, Text, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 from tonsdk.crypto import mnemonic_new
+from tonsdk.contract.wallet import WalletVersionEnum, Wallets
 
 class User(BaseModel):
     __tablename__ = "users"
@@ -9,6 +10,7 @@ class User(BaseModel):
     id = Column(Integer, primary_key=True)
     username = Column(VARCHAR(50), unique=True, nullable=False)
     seed = Column(VARCHAR(320), unique=True, nullable=False)
+    address = Column(VARCHAR(320), unique=True, nullable=False)
     ispassport = Column(Boolean, default=False)
     action_points = Column(Integer, default=0)
     payed = Column(Boolean, default=False)
@@ -97,8 +99,9 @@ async def get_user(telegram_id: int, session_maker: sessionmaker) -> User:
 
 async def create_user(telegram_id: int, username: str, session_maker: sessionmaker):
     seed = ' '.join(mnemonic_new())
+    wallet = Wallets.from_mnemonics(seed, WalletVersionEnum.v3r2, 0)
     async with session_maker() as session:
-        await session.merge(User(id=telegram_id,
-                                 username=username, seed=seed))
+        await session.merge(User(id = telegram_id,
+                                 username=username, seed = seed, address = wallet[3].address.to_string(True, True, True)))
         await session.commit()
 

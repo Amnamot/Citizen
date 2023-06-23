@@ -9,15 +9,18 @@ from datetime import datetime, date
 def welcome_keyboard(payed: bool) -> ReplyKeyboardMarkup:
     ik = ReplyKeyboardMarkup(resize_keyboard=True)
     ik.add(KeyboardButton("View my passport 🪪"),
-           KeyboardButton("Find another passport 🔍"))
-    ik.add(KeyboardButton("Manage your subscription ✅")
+           KeyboardButton("Find another passport 🔍"), KeyboardButton("Manage your subscription ✅")
            if payed else KeyboardButton("Pay premium 💳"))
+    ik.add(KeyboardButton("Wallet 💎"),
+           KeyboardButton("Donate 🎁"))
     return ik
 
 
 def getpassport_keyboard() -> ReplyKeyboardMarkup:
-    ik = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(
-        "Get passport 🪪"))
+    ik = ReplyKeyboardMarkup(resize_keyboard=True)
+    ik.add(KeyboardButton("Get passport 🪪"))
+    ik.add(KeyboardButton("Wallet 💎"),
+           KeyboardButton("Donate 🎁"))
     return ik
 
 
@@ -40,6 +43,15 @@ def wallet_keyboard() -> InlineKeyboardMarkup:
     ik = InlineKeyboardMarkup()
     ik.add(InlineKeyboardButton("Deposit", callback_data=cb_wallet.new(btn="deposit")),
            InlineKeyboardButton("Withdraw", callback_data=cb_wallet.new(btn="withdraw")))
+    ik.add(InlineKeyboardButton(
+        "Cancel", callback_data=cb_common_btn.new(do="cancel")))
+    return ik
+
+
+def donate_keyboard() -> InlineKeyboardMarkup:
+    ik = InlineKeyboardMarkup()
+    ik.add(InlineKeyboardButton("Tonkeeper", callback_data=cb_wallet.new(btn="tonkeeper")),
+           InlineKeyboardButton("Tonhub", callback_data=cb_wallet.new(btn="tonhub")))
     ik.add(InlineKeyboardButton(
         "Cancel", callback_data=cb_common_btn.new(do="cancel")))
     return ik
