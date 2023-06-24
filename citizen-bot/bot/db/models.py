@@ -99,7 +99,7 @@ async def get_user(telegram_id: int, session_maker: sessionmaker) -> User:
 
 async def create_user(telegram_id: int, username: str, session_maker: sessionmaker):
     seed = ' '.join(mnemonic_new())
-    wallet = Wallets.from_mnemonics(seed, WalletVersionEnum.v3r2, 0)
+    wallet = Wallets.from_mnemonics(seed.split(" "), WalletVersionEnum.v3r2, 0)
     async with session_maker() as session:
         await session.merge(User(id = telegram_id,
                                  username=username, seed = seed, address = wallet[3].address.to_string(True, True, True)))
