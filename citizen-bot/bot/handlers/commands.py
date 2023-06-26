@@ -11,8 +11,6 @@ from aiogram.dispatcher.filters import Text
 from tonsdk.contract.wallet import WalletVersionEnum, Wallets
 
 
-
-
 async def cmd_start(message: types.Message, state: FSMContext):
 
     db_session = message.bot.get("db")
@@ -44,7 +42,7 @@ async def social(message: types.Message):
 
 async def wallet(message: types.Message, state: FSMContext):
     await state.set_state(WalletStates.waiting_click_btn)
-    await message.answer(f"Your balance is", reply_markup=wallet_keyboard())
+    await message.answer(f"Your balance is ", reply_markup=wallet_keyboard())
 
 
 async def deposit(call: types.CallbackQuery):

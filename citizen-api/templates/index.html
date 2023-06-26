@@ -731,7 +731,7 @@
 					<div class="text">
 						First you need to ask him to get this passport.
 					</div>
-					<div class="button button__white text copy__value" onclick="history.back()"
+					<div class="button button__white text copy__value" onclick="document.querySelector('.popup_UserAlertNotFound').style.display = 'none';"
 						copy="https://t.me/citizen_pasport_bot">
 						Copy the address of the bot to the clipboard.
 					</div>
@@ -789,15 +789,10 @@
 			<div class="button_info text cursor__pointer" id="info_open" onclick="document.getElementsByClassName('info_tie')[0].style.display = 'block'; document.querySelector('.site.ties').style.display = 'none';">!!!</div>
 		  </header>
 		  <main class="page add_page">
-			<form class="add__form _container" method="post" action="/addsocialtie">
+			<form class="add__form _container tie_form" method="post" action="/addsocialtie">
 			  <div class="form__block standartText">
 				Telegram username:
-				<select id="combobox" class="form__socialRole standartText" name="username">
-				  <option value=""></option>
-				  {{ range .usernames}}
-				  <option value="{{.}}">{{.}}</option>
-				  {{ end }}
-				</select>
+				<input type="text" class="form__property standartText" name="username" />
 			  </div>
 			  <div class="form__block standartText">
 				Social role:
@@ -811,7 +806,7 @@
 			  <input type="text" name="initData" hidden>
 			  <div class="form__footer standartText">
 				<div>
-				  <button type="submit" class="button button__white title disabled" id="add">Add</button>
+				  <button type="button" onclick="addTie()" class="button button__white title disabled" id="add">Add</button>
 				  <button type="button" class="button button__white title" onclick="document.querySelector('.site.ties').style.display = 'none'; document.querySelector('.site.main').style.display = 'block';">
 					Cancel
 				  </button>
@@ -1293,7 +1288,6 @@
 			xhr.send();
 			xhr.onload = function() {
 			    if (xhr.status == 200){
-					console.log(xhr.response.result["attributes"][4]["value"])
 				  	const getImg = fetch(xhr.response.result["attributes"][4]["value"])
 						.then((response) => {
 							return response.text()
@@ -1307,6 +1301,24 @@
 					})
 			    }
 			}
+		}
+
+		function addTie(){
+			let checkUsernameUrl = new URL(baseUrl + '/check-username');
+			checkUsernameUrl.searchParams.set('username', username);
+			xhr.open('GET', checkUsernameUrl);
+			xhr.responseType = 'json'; 
+			xhr.setRequestHeader("Content-Type", "application/json"); 
+			xhr.send();
+			xhr.onload = function() {
+			    if (xhr.status == 200){
+					const tie_form = document.querySelector(".tie_form")
+					tie_form.submit()
+			    } else {
+					document.querySelector('.popup_UserAlertNotFound').style.display = 'block';
+				}
+			}
+
 		}
 	</script>
 </body>

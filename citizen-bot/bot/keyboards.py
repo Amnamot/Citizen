@@ -11,7 +11,7 @@ def welcome_keyboard(payed: bool) -> ReplyKeyboardMarkup:
     ik.add(KeyboardButton("View my passport 🪪"),
            KeyboardButton("Find another passport 🔍"), KeyboardButton("Manage your subscription ✅")
            if payed else KeyboardButton("Pay premium 💳"))
-    ik.add(KeyboardButton("Wallet 💎"),
+    ik.add(KeyboardButton("Balance 💎"),
            KeyboardButton("Donate 🎁"))
     return ik
 
@@ -19,8 +19,6 @@ def welcome_keyboard(payed: bool) -> ReplyKeyboardMarkup:
 def getpassport_keyboard() -> ReplyKeyboardMarkup:
     ik = ReplyKeyboardMarkup(resize_keyboard=True)
     ik.add(KeyboardButton("Get passport 🪪"))
-    ik.add(KeyboardButton("Wallet 💎"),
-           KeyboardButton("Donate 🎁"))
     return ik
 
 

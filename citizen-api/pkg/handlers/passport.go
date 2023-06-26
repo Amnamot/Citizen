@@ -31,6 +31,10 @@ const (
 //         tgbotapi.NewInlineKeyboardButtonData("Ignore", "Ignore"),
 //     ),
 // )
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
@@ -326,26 +330,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	data["addAttitudes"] = c["attitudes"]
 
-	var usernames []string
-
-	rows, err = dbpool.Query(context.Background(), "SELECT username FROM users WHERE ispassport=TRUE")
-	if err != nil {
-		logrus.Println(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": nil})
-		return
-	}
-
-	for rows.Next() {
-		var username string
-		if err := rows.Scan(&username); err != nil {
-			logrus.Println(err.Error())
-		}
-		usernames = append(usernames, username)
-	}
-
-	data["usernames"] = usernames
-
 
 	err = ts.Execute(w, data)
 	if err != nil {
@@ -410,6 +394,11 @@ func CheckTies(w http.ResponseWriter, r *http.Request){
 }
 
 
+func SetRole(w http.ResponseWriter, r *http.Request){
+
+}
+
+
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	username := r.URL.Query().Get("username")
@@ -445,6 +434,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserPic(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	_, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 
 	if err != nil {
@@ -455,4 +445,30 @@ func GetUserPic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{"result": "AgACAgIAAxkDAAIQT2SVfImQBxn4kT2YH5HCcAsJki0XAAKspzEbmfZHOj8hiIEHb1YFAQADAgADYQADLwQ"})
+}
+
+
+func CheckUsername(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("username")
+
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": err})
+		return
+	}
+	defer dbpool.Close()
+
+	var id int
+
+	err = dbpool.QueryRow(context.Background(), "SELECT id FROM users WHERE (username=$1 AND ispassport = TRUE)", username).Scan(&id)
+	if err != nil {
+		logrus.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "error", "details": "username does not exists"})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"result": id})
 }
